@@ -897,7 +897,9 @@ class BoardHelper
 
                         }
 
-                        if(!IsWhitekingUnderThreat(CheckEnd) && !IsBlackkingUnderThreat(CheckEnd) && !error)
+                        if((!IsWhitekingUnderThreat(CheckEnd) && !IsBlackkingUnderThreat(CheckEnd) && !error) ||
+                            ctx.howMuchBlackkingMoved == 50 || ctx.howMuchWhitekingMoved == 50
+                            )
                         {
                             ctx.drawStuation = true;
 
