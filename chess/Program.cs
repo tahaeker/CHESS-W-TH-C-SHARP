@@ -285,7 +285,7 @@ class BoardHelper
         ctx.whiteTurn = !ctx.whiteTurn;
         //last movements
         ctx.lastFromCell = CellToCell(fromCell, ctx.lastFromCell);
-        ctx.lastToCell = CellToCell(fromCell, ctx.lastToCell);
+        ctx.lastToCell = CellToCell(toCell, ctx.lastToCell);
 
 
         // did rooks move?
@@ -766,17 +766,14 @@ class BoardHelper
 
     public static bool IsWhitekingUnderThreat(ChessContext ctx)
     {
-        (Cell whiteKing, Cell blackKing) = kingLocations(ctx);
-
-
-        bool isWhiteKingUnderCheck = false;
+        (Cell whiteKing, _) = kingLocations(ctx);
 
         //fro each order stone to white king location
         for (int checkI = 0; checkI < 8; checkI++)
         {
             for (int checkJ = 0; checkJ < 8; checkJ++)
             {
-                if (checkI ==3&& checkJ == 3)
+                if (checkI == 1 & checkJ == 3)
                 {
 
                 }
@@ -785,16 +782,14 @@ class BoardHelper
                 Cell fromCellOfThreatCell = StringToCell(fromCellOfThreat, tempCtx);
 
                 // kendi taşın kendini tehtid edemeyeceği için renk değiştirdik
-                tempCtx.whiteTurn = false ;
-
+                tempCtx.whiteTurn = false;
                 if (IsStoneBlack(fromCellOfThreatCell, tempCtx) && MoveError(fromCellOfThreat, whiteKing.cellString, tempCtx) == "")
-                    isWhiteKingUnderCheck = true;
-                
+                    return true;
+
             }
 
         }
-
-        return isWhiteKingUnderCheck;
+        return false;
     }
 
     public static bool IsBlackkingUnderThreat(ChessContext ctx)
@@ -861,7 +856,7 @@ class BoardHelper
 
     public static void CheckGameEnd(ChessContext ctx)
     {
-
+        //the point in order for fromCEll
         for (int i = 0; i < 8; i++)
         {
             for (int j = 0; j < 8; j++)
@@ -869,7 +864,7 @@ class BoardHelper
                 string from = IndexToString(i, j);
                 char ch = ctx.board[i, j];
                 if (ch != '.') continue;
-
+                //toCell in order
                 for (int iTo = 0; iTo < 8; iTo++)
                 {
                     for (int jTo = 0; jTo < 8; jTo++)
@@ -878,6 +873,8 @@ class BoardHelper
                         string to = IndexToString(iTo, jTo);
                         ChessContext CheckEnd = copyBoard(ctx);
                         bool error = MoveError(from, to, CheckEnd) == "" ? false : true;
+                        if (IsWhitekingUnderThreat(CheckEnd) && !error) break;
+
                         if (IsWhitekingUnderThreat(CheckEnd) && error)
                         {
                             ctx.blackWins = true;
@@ -944,11 +941,11 @@ class BoardHelper
                 char ch = ctx.board[i, j];
                 if (ch == 'K')
                     whiteKing = true;
-                else if (ch == 'k')
+                if (ch == 'k')
                     blackKing = true;
-                else if (IsStoneWhiteC(ch))
+                if (ch != 'K' && IsStoneWhiteC(ch))
                     whiteKing = false;
-                else if(IsStoneWhiteC(ch))
+                if(ch != 'k'&&IsStoneWhiteC(ch))
                     blackKing = false;
 
 
@@ -966,9 +963,11 @@ class BoardHelper
     {
         Cell fromCell= StringToCell(from, ctx);
         Cell toCell = StringToCell(to, ctx);
-        if(toCell.cellIndex == (0, 2))
-        {
 
+        //for flag
+        if(toCell.cellIndex == (2, 4)&& toCell.stone == 'K' && fromCell.cellIndex== (1,3))
+        {
+           
         }
         if (fromCell.stone== '.')
         {
@@ -1162,14 +1161,14 @@ class Program
     {
         ChessContext ctx = new ChessContext();
         ctx.board = new char[8, 8]{
-        { '.', '.', '.', '.', 'k', '.', '.', '.' }, // 8. sıra (siyah)
+        { 'r', 'n', 'b', 'q', 'k', 'b', 'n', 'r' }, // 8. sıra (siyah)
+        { 'p', 'p', 'p', 'p', 'p', 'p', 'p', 'p' },
         { '.', '.', '.', '.', '.', '.', '.', '.' },
         { '.', '.', '.', '.', '.', '.', '.', '.' },
         { '.', '.', '.', '.', '.', '.', '.', '.' },
         { '.', '.', '.', '.', '.', '.', '.', '.' },
-        { '.', '.', '.', '.', '.', '.', '.', '.' },
-        { '.', '.', '.', '.', '.', '.', '.', '.' },
-        { 'R', '.', '.', '.', 'K', '.', '.', '.' }  // 1. sıra (beyaz)
+        { 'P', 'P', 'P', 'P', 'P', 'P', 'P', 'P' },
+        { 'R', 'N', 'B', 'Q', 'K', 'B', 'N', 'R' }  // 1. sıra (beyaz)
         };
 
 
@@ -1184,6 +1183,7 @@ class Program
 
 
             BoardHelper.TakeTo(ref ctx);
+            Console.Clear();
 
             string error = BoardHelper.MoveError(ctx.inputFrom, ctx.inputTo, ctx);
 
@@ -1213,7 +1213,6 @@ class Program
 
 
 
-            BoardHelper.CheckGameEnd(ctx);
 
             if (ctx.whiteWins)
             {
