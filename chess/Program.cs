@@ -8,30 +8,37 @@ using System.Security.Cryptography;
 
 class Cell
 {
-	public int i;
-	public int j;
-	public char stone;
-	public (int, int) cellIndex;
-	public string cellString;
+	public int Row { get; }
+	public int Col { get; }
+    public char stone { get; }
 
-	
+	public (int, int) cellIndex => (Row,Col);
+	public string cellString => BoardHelper.IndexToString(Row, Col);
+
+	public bool isEmpty => stone == '.';
+
+    private static readonly char[] WhitePieces = { 'P', 'R', 'N', 'B', 'Q', 'K' };
+    private static readonly char[] BlackPieces = { 'p', 'r', 'n', 'b', 'q', 'k' };
+
+    public bool IsWhite => WhitePieces.Contains(stone);
+    public bool IsBlack => BlackPieces.Contains(stone);
 
 
-	public Cell(int i, int j, ChessContext ctx)
+    public Cell(int i, int j, ChessContext ctx)
 	{
 
-		this.i = i;
-		this.j = j;
-		if (ctx != null)
+		Row = i;
+		Col = j;
+		if (ctx != null && i > -1 && j > -1)
 		{//chess context is not null
-
-
-			if (i != -1 && j != -1) {
-				this.stone = ctx.board[i, j];
-			}       
+			stone = ctx.board[i, j];
 		}
-		this.cellIndex = (this.i,this.j);
-		this.cellString = BoardHelper.IndexToString(this.i, this.j);
+		else
+		{
+			stone = '.';// default empty stone
+
+        }
+		
 	}
 }
 class ChessContext
@@ -78,40 +85,21 @@ class BoardHelper
 {
 	public static (int, int) StringToIndex(string position)
 	{
-		int i = 0;
-		int j = 0;
-		switch (position[0])
-		{
-			case 'a': j = 0; break;
-			case 'b': j = 1; break;
-			case 'c': j = 2; break;
-			case 'd': j = 3; break;
-			case 'e': j = 4; break;
-			case 'f': j = 5; break;
-			case 'g': j = 6; break;
-			case 'h': j = 7; break;
+       
 
-		}
-
-		switch (position[1])
-		{
-			case '1': i = 7; break;
-			case '2': i = 6; break;
-			case '3': i = 5; break;
-			case '4': i = 4; break;
-			case '5': i = 3; break;
-			case '6': i = 2; break;
-			case '7': i = 1; break;
-			case '8': i = 0; break;
-		}
-
-		return (i, j);
-	}
+        position = position.ToLower(); // küçük harfe 
+		//'a' = ascii97
+        int col = position[0] - 'a'; // 'a' karakterinden çıkararak sütun indeksini al
+		// '1' = ascii 48
+        int row = 8- (position[1] - '0'); // '0' karakterinden çıkararak satır indeksini al
+		return (row, col);
+    }
 
 
 
 
-	public static Cell StringToCell(string position, ChessContext ctx)
+
+    public static Cell StringToCell(string position, ChessContext ctx)
 	{
 		(int i, int j) = StringToIndex(position);
 
@@ -123,27 +111,18 @@ class BoardHelper
 
 	public static string IndexToString(int i, int j)
 	{
-		//string stringI = i.ToString();
-		//string stringJ = j.ToString();
-
-		//return stringI + stringJ;// ilk j sonra i çünkü a2 de ilk j!!!!!!!!!!!!
-		//böyle yazıldığında olmuyor
 		char col = (char)('a' + j);
 		int row = 8 - i;
 		return $"{col}{row}";
 	}
 
 
-	public static Cell CellToCell(Cell MethodCell, Cell CtxCell)
+	public static Cell CellToCell(Cell MethodCell, ChessContext ctx)
 	{
-		CtxCell.i = MethodCell.i;
-		CtxCell.j = MethodCell.j;
-		CtxCell.stone = MethodCell.stone;
+		return new Cell(MethodCell.Row, MethodCell.Col, ctx); // Cell nesnesini yeni bir ChessContext ile oluştur
 
 
-		return CtxCell;
-
-	}
+    }
 
 
 
@@ -176,7 +155,7 @@ class BoardHelper
 					string pos = IndexToString(i, j);
 					string moveError = MoveError(ctx.inputFrom, pos, ctx);
 
-					if (i == ctx.touchedCell.i && j == ctx.touchedCell.j)
+					if (i == ctx.touchedCell.Row && j == ctx.touchedCell.Col)
 					{
 						Console.ForegroundColor = ConsoleColor.Red;
 					}
@@ -208,7 +187,7 @@ class BoardHelper
 
 
 
-	public static void TakeFrom(ref ChessContext ctx)
+	public static void TakeFrom(ChessContext ctx, IInputProvider inputProvider)
 	{
         string errorMessage;
         do
@@ -235,7 +214,7 @@ class BoardHelper
 
 
 
-	public static void TakeTo(ref ChessContext ctx)
+	public static void TakeTo(ChessContext ctx, IInputProvider inputProvider)
 	{
         string errorMessage = "";
         do
@@ -293,8 +272,8 @@ class BoardHelper
 
 
 
-		ctx.board[toCell.i, toCell.j] = ctx.board[fromCell.i, fromCell.j];
-		ctx.board[fromCell.i, fromCell.j] = '.';
+		ctx.board[toCell.Row, toCell.Col] = ctx.board[fromCell.Row, fromCell.Col];
+		ctx.board[fromCell.Row, fromCell.Col] = '.';
 
 		
 
@@ -304,15 +283,15 @@ class BoardHelper
 			char.ToLower(ctx.lastToCell.stone) == 'p')
 		{
 			int dir = ctx.whiteTurn ? -1 : 1;
-			ctx.board[toCell.i - dir, toCell.j] = '.';
+			ctx.board[toCell.Row - dir, toCell.Col] = '.';
 		}
 
 
 		//Turn change
 		ctx.whiteTurn = !ctx.whiteTurn;
 		//last movements
-		ctx.lastFromCell = CellToCell(fromCell, ctx.lastFromCell);
-		ctx.lastToCell = CellToCell(toCell, ctx.lastToCell);
+		ctx.lastFromCell = CellToCell(fromCell, ctx);
+		ctx.lastToCell = CellToCell(toCell,ctx);
 
 
 		// did rooks move?
@@ -422,23 +401,6 @@ class BoardHelper
 
 	}
 
-
-
-	public static bool IsStoneWhite(Cell Stone, ChessContext ctx)
-	{
-		char stone = Stone.stone;
-
-
-		if (stone == 'P' | stone == 'R' |
-			stone == 'N' | stone == 'B' |
-			stone == 'Q' | stone == 'K')
-		{
-			return true;
-		}
-
-		return false;
-
-	}
 	public static bool IsStoneWhiteC(char ch)
 	{
 		char stone = ch;
@@ -453,60 +415,7 @@ class BoardHelper
 		return false;
 
 	}
-	public static bool IsStoneBlackC(char ch)
-	{
-		char stone = ch;
-
-		if (stone == 'p' | stone == 'r' |
-			stone == 'n' | stone == 'b' |
-			stone == 'q' | stone == 'k')
-		{
-			return true;
-		}
-
-		return false;
-
-	}
-	public static bool IsStoneEmptyC(char ch)
-	{
-
-		char stone = ch;
-		
-
-		if (stone == '.')
-		{
-			return true;
-		}
-		return false;
-
-
-	}
-	public static bool IsStoneEmpty(Cell Stone, ChessContext ctx)
-	{
-
-		char stone = Stone.stone;
-
-		if (stone == '.')
-		{
-			return true;
-		}
-		return false;
-
-
-	}
-	public static bool IsStoneBlack(Cell Stone, ChessContext ctx)
-	{
-		char stone = Stone.stone;
-		if (stone == 'p' | stone == 'r' |
-			stone == 'n' | stone == 'b' |
-			stone == 'q' | stone == 'k')
-		{
-			return true;
-		}
-		return false;
-
-	}
-
+	
 
 
 
@@ -521,17 +430,16 @@ class BoardHelper
 
 
 
-		if (fromCell.j == toCell.j &&
-			toCell.i - fromCell.i == dir &&
-			IsStoneEmpty(toCell, ctx))
-		{
+		if (fromCell.Col == toCell.Col &&
+			toCell.Row - fromCell.Row == dir &&
+			toCell.isEmpty)		{
 			return true;
 		} //start point of the pawm
 		else if (
-			fromCell.j == toCell.j && toCell.i - fromCell.i == 2 * dir &&
-			(fromCell.i == 1 || fromCell.i == 6) &&
-			IsStoneEmpty(toCell, ctx) &&
-			ctx.board[fromCell.i + dir, fromCell.j] == '.')
+			fromCell.Col == toCell.Col && toCell.Row - fromCell.Row == 2 * dir &&
+			(fromCell.Row == 1 || fromCell.Row == 6) &&
+			toCell.isEmpty &&
+			ctx.board[fromCell.Row + dir, fromCell.Col] == '.')
 		{
 			return true;
 		}
@@ -539,19 +447,19 @@ class BoardHelper
 
 		//çapraz yemek için
 		if (
-			(!IsStoneEmpty(toCell, ctx) && (toCell.j - fromCell.j == dir) && (toCell.i - fromCell.i == dir)) ||
-			(!IsStoneEmpty(toCell, ctx) && (toCell.j - fromCell.j == -dir) && (toCell.i - fromCell.i == dir))
+			(!toCell.isEmpty && (toCell.Col - fromCell.Col == dir) && (toCell.Row - fromCell.Row == dir)) ||
+			(!toCell.isEmpty && (toCell.Col - fromCell.Col == -dir) && (toCell.Row - fromCell.Row == dir))
 			)
 		{
 			return true;
 		}
 		// passant move
-		if (char.ToLower(ctx.lastFromCell.stone) == 'p' && ctx.lastToCell.j == toCell.j &&
+		if (char.ToLower(ctx.lastFromCell.stone) == 'p' && ctx.lastToCell.Col == toCell.Col &&
 			(
-			(ctx.lastFromCell.i == 6 && fromCell.i == 4 && (toCell.i - fromCell.i == dir) && (toCell.j - fromCell.j == -dir)) ||
-			(ctx.lastFromCell.i == 6 && fromCell.i == 4 && (toCell.i - fromCell.i == dir) && (toCell.j - fromCell.j == dir)) ||
-			(ctx.lastFromCell.i == 1 && fromCell.i == 3 && (toCell.i - fromCell.i == dir) && (toCell.j - fromCell.j == dir)) ||
-			(ctx.lastFromCell.i == 1 && fromCell.i == 3 && (toCell.i - fromCell.i == dir) && (toCell.j - fromCell.j == -dir))
+			(ctx.lastFromCell.Row == 6 && fromCell.Row == 4 && (toCell.Row - fromCell.Row == dir) && (toCell.Col - fromCell.Col == -dir)) ||
+			(ctx.lastFromCell.Row == 6 && fromCell.Row == 4 && (toCell.Row - fromCell.Row == dir) && (toCell.Col - fromCell.Col == dir)) ||
+			(ctx.lastFromCell.Row == 1 && fromCell.Row == 3 && (toCell.Row - fromCell.Row == dir) && (toCell.Col - fromCell.Col == dir)) ||
+			(ctx.lastFromCell.Row == 1 && fromCell.Row == 3 && (toCell.Row - fromCell.Row == dir) && (toCell.Col - fromCell.Col == -dir))
 			)
 			)
 		{
@@ -573,29 +481,29 @@ class BoardHelper
 		}
 
 		//yatay sağa doğru
-		if (fromCell.i == toCell.i &&
-			toCell.j != fromCell.j
+		if (fromCell.Row == toCell.Row &&
+			toCell.Col != fromCell.Col
 			)
 		{
-			int yDirectionStep = (toCell.j > fromCell.j) ? 1 : -1;
+			int yDirectionStep = (toCell.Col > fromCell.Col) ? 1 : -1;
 
-			for (int j = (fromCell.j + yDirectionStep); j != toCell.j; j += yDirectionStep)
+			for (int j = (fromCell.Col + yDirectionStep); j != toCell.Col; j += yDirectionStep)
 			{
-				if (ctx.board[fromCell.i, j] != '.')
+				if (ctx.board[fromCell.Row, j] != '.')
 
 					return false;
 			}
 
 
 		}
-		else if (fromCell.i != toCell.i &&
-		fromCell.j == toCell.j)
+		else if (fromCell.Row != toCell.Row &&
+		fromCell.Col == toCell.Col)
 		{
-			int xDirectionStep = (toCell.i > fromCell.i) ? 1 : -1;//dikey
+			int xDirectionStep = (toCell.Row > fromCell.Row) ? 1 : -1;//dikey
 
-			for (int i = fromCell.i + xDirectionStep; i != toCell.i; i += xDirectionStep)
+			for (int i = fromCell.Row + xDirectionStep; i != toCell.Row; i += xDirectionStep)
 			{
-				if (ctx.board[i, fromCell.j] != '.') return false;
+				if (ctx.board[i, fromCell.Col] != '.') return false;
 			}
 		} else
 		{
@@ -611,26 +519,26 @@ class BoardHelper
 	public static bool IsValidKnightMove(Cell fromCell, Cell toCell, ChessContext ctx)
 	{
 
-		if (toCell.i == fromCell.i - 2 &&
-			((toCell.j == fromCell.j - 1) || (toCell.j == fromCell.j + 1))
+		if (toCell.Row == fromCell.Row - 2 &&
+			((toCell.Col == fromCell.Col - 1) || (toCell.Col == fromCell.Col + 1))
 			)
 		{
 			return true;
 		}
-		else if (toCell.j == fromCell.j - 2 &&
-			((toCell.i == fromCell.i - 1) || toCell.i == fromCell.i + 1)
+		else if (toCell.Col == fromCell.Col - 2 &&
+			((toCell.Row == fromCell.Row - 1) || toCell.Row == fromCell.Row + 1)
 			)
 		{
 			return true;
 		}
-		else if (toCell.i == fromCell.i + 2 &&
-			((toCell.j == fromCell.j + 1) || (toCell.j == fromCell.j - 1))
+		else if (toCell.Row == fromCell.Row + 2 &&
+			((toCell.Col == fromCell.Col + 1) || (toCell.Col == fromCell.Col - 1))
 			)
 		{
 			return true;
 		}
-		else if (toCell.j == fromCell.j + 2 &&
-			((toCell.i == fromCell.i - 1) || toCell.i == fromCell.i + 1)
+		else if (toCell.Col == fromCell.Col + 2 &&
+			((toCell.Row == fromCell.Row - 1) || toCell.Row == fromCell.Row + 1)
 			)
 		{
 			return true;
@@ -650,8 +558,8 @@ class BoardHelper
 			return false;
 		}
 
-		int deltaI = toCell.i - fromCell.i;
-		int deltaJ = toCell.j - fromCell.j;
+		int deltaI = toCell.Row - fromCell.Row;
+		int deltaJ = toCell.Col - fromCell.Col;
 		//çapraz olmalı
 		if (Math.Abs(deltaI) != Math.Abs(deltaJ))
 		{
@@ -666,8 +574,8 @@ class BoardHelper
 		int steps = Math.Abs(deltaI);// kaç adım ilelrlesin
 		for (int k = 1; k < steps; k++)// ara karelere bakıp taş varsa false döner
 		{
-			int checkI = fromCell.i + dirI * k;
-			int checkJ = fromCell.j + dirJ * k;
+			int checkI = fromCell.Row + dirI * k;
+			int checkJ = fromCell.Col + dirJ * k;
 			if (ctx.board[checkI, checkJ] != '.')
 			{
 				return false;
@@ -695,15 +603,15 @@ class BoardHelper
 	{
 	  
 		// direction 
-		int deltaI = toCell.i - fromCell.i;
-		int deltaJ = toCell.j - fromCell.j;
+		int deltaI = toCell.Row - fromCell.Row;
+		int deltaJ = toCell.Col - fromCell.Col;
 		int dirI = deltaI > 0 ? 1 : -1;
 		int dirJ = deltaJ > 0 ? 1 : -1;
 
 		//for normal movement 
-		if ((Math.Abs(fromCell.i - toCell.i) == 1 && Math.Abs(fromCell.j - toCell.j) == 1) ||
-		(Math.Abs(fromCell.i - toCell.i) == 1 && Math.Abs(fromCell.j - toCell.j) == 0) ||
-		(Math.Abs(fromCell.i - toCell.i) == 0 && Math.Abs(fromCell.j - toCell.j) == 1))
+		if ((Math.Abs(fromCell.Row - toCell.Row) == 1 && Math.Abs(fromCell.Col - toCell.Col) == 1) ||
+		(Math.Abs(fromCell.Row - toCell.Row) == 1 && Math.Abs(fromCell.Col - toCell.Col) == 0) ||
+		(Math.Abs(fromCell.Row - toCell.Row) == 0 && Math.Abs(fromCell.Col - toCell.Col) == 1))
 		{
 			return true;
 		}
@@ -830,8 +738,9 @@ class BoardHelper
 
 				// kendi taşın kendini tehtid edemeyeceği için renk değiştirdik
 				tempCtx.whiteTurn = false;
-				if (IsStoneBlack(fromCellOfThreatCell, tempCtx) && MoveError(fromCellOfThreat, whiteKing.cellString, tempCtx) == "")
-					return true;
+				if (!fromCellOfThreatCell.IsBlack && MoveError(fromCellOfThreat, whiteKing.cellString, tempCtx) == "")
+
+                    return true;
 
 			}
 
@@ -859,7 +768,7 @@ class BoardHelper
 
 				// kendi taşın kendini tehtid edemeyeceği için renk değiştirdik
 				tempCtx.whiteTurn = true ;
-				if (IsStoneWhite(fromCellOfThreatCell, tempCtx) && MoveError(fromCellOfThreat, blackKing.cellString, tempCtx) == "")
+				if (fromCellOfThreatCell.IsWhite && MoveError(fromCellOfThreat, blackKing.cellString, tempCtx) == "")
 					return true;
 				
 			}
@@ -892,9 +801,9 @@ class BoardHelper
 		newCtx.IsFakeMovement = ctx.IsFakeMovement;
 
 		// Cell nesnelerini de kopyala (gerekirse)
-		newCtx.touchedCell = new Cell(ctx.touchedCell.i, ctx.touchedCell.j, newCtx);
-		newCtx.lastFromCell = new Cell(ctx.lastFromCell.i, ctx.lastFromCell.j, newCtx);
-		newCtx.lastToCell = new Cell(ctx.lastToCell.i, ctx.lastToCell.j, newCtx);
+		newCtx.touchedCell = new Cell(ctx.touchedCell.Row, ctx.touchedCell.Col, newCtx);
+		newCtx.lastFromCell = new Cell(ctx.lastFromCell.Row, ctx.lastFromCell.Col, newCtx);
+		newCtx.lastToCell = new Cell(ctx.lastToCell.Row, ctx.lastToCell.Col, newCtx);
 
 		return newCtx;
 	}
@@ -1052,22 +961,23 @@ class BoardHelper
 			return "Y Axis of From must be a valid between 1-7";
 		}
 
-		if(ctx.whiteTurn & !IsStoneWhite(fromCell, ctx))
+		if(ctx.whiteTurn & !fromCell.IsWhite)
 		{
 			return "Row of White Stones";
 		}
-		else if (!ctx.whiteTurn & IsStoneWhite(fromCell, ctx))
+		else if (!ctx.whiteTurn & fromCell.IsWhite)
 		{
 			return "Row of black Stones";
 		}
 
 
-		if (IsStoneWhite(fromCell, ctx) & (IsStoneWhite(toCell, ctx) & !IsStoneEmpty(toCell,ctx)))
-		{
+		if (fromCell.IsWhite & (toCell.IsWhite) & !toCell.isEmpty)
+
+        {
 			
 			return "Cannot Whites Move Owm Stone";
 		}
-		if (IsStoneBlack(fromCell,ctx) & (IsStoneBlack(toCell,ctx) & !IsStoneEmpty(toCell,ctx)))
+		if (fromCell.IsBlack & (fromCell.IsBlack & !toCell.isEmpty))
 		{
 		   return "Cannot Blacks Move Owm Stone";   
 		}
@@ -1212,6 +1122,35 @@ class BoardHelper
 	}
 }
 
+
+public interface IInputProvider
+{
+    string ReadLine();
+}
+
+public class ConsoleInputProvider : IInputProvider//this is taking data input from console
+{
+    public string ReadLine()
+    {
+        return Console.ReadLine();
+    }
+}
+
+//public class TestInputProvider : IInputProvider//this is taking data input from test
+//{
+//	//burayı anlamadım
+//	//private readonly Queue<string> inputs;
+//	//public TestInputProvider(IEnumerable<string> inputs)
+//	//{
+//	//	this.inputs = new Queue<string>(inputs);
+//	//}
+//	//public string ReadLine()
+//	//{
+//	//	return inputs.Count > 0 ? inputs.Dequeue() : null;
+//	//}
+//}
+
+
 class Program
 {
 
@@ -1229,18 +1168,17 @@ class Program
 		{ 'R', 'N', 'B', 'Q', 'K', 'B', 'N', 'R' }  // 1. sıra (beyaz)
 		};
 
+		IInputProvider inputProvider = new ConsoleInputProvider();
 
-
-
-		BoardHelper.PrintBoard(ref ctx);
+        BoardHelper.PrintBoard(ref ctx);
 		while (true)
 		{
-            BoardHelper.TakeFrom(ref ctx);
+            BoardHelper.TakeFrom(ctx, inputProvider);
             Console.Clear();
             BoardHelper.PrintBoard(ref ctx);
 
 
-            BoardHelper.TakeTo(ref ctx);
+            BoardHelper.TakeTo(ctx, inputProvider);
             Console.Clear();
 
             string error = BoardHelper.MoveError(ctx.inputFrom, ctx.inputTo, ctx);
@@ -1293,5 +1231,4 @@ class Program
 
 }
 //eksikler
-//yanlış from to condition tekrar istemek
 //passant move tahtanın ortasındada oldu siyah taşda
