@@ -76,6 +76,10 @@ class ChessContext
 	public int howMuchBlackkingMoved = 0;
 
 
+
+	public List<string> MoveHistory { get; set; } = new List<string>();
+
+
 	
 	
 
@@ -85,21 +89,21 @@ class BoardHelper
 {
 	public static (int, int) StringToIndex(string position)
 	{
-       
 
-        position = position.ToLower(); // küçük harfe 
-		//'a' = ascii97
-        int col = position[0] - 'a'; // 'a' karakterinden çıkararak sütun indeksini al
-		// '1' = ascii 48
-        int row = 8- (position[1] - '0'); // '0' karakterinden çıkararak satır indeksini al
+
+		position = position.ToLower(); // küçük harfe 
+									   //'a' = ascii97
+		int col = position[0] - 'a'; // 'a' karakterinden çıkararak sütun indeksini al
+									 // '1' = ascii 48
+		int row = 8 - (position[1] - '0'); // '0' karakterinden çıkararak satır indeksini al
 		return (row, col);
-    }
+	}
 
 
 
 
 
-    public static Cell StringToCell(string position, ChessContext ctx)
+	public static Cell StringToCell(string position, ChessContext ctx)
 	{
 		(int i, int j) = StringToIndex(position);
 
@@ -122,7 +126,7 @@ class BoardHelper
 		return new Cell(MethodCell.Row, MethodCell.Col, ctx); // Cell nesnesini yeni bir ChessContext ile oluştur
 
 
-    }
+	}
 
 
 
@@ -173,6 +177,7 @@ class BoardHelper
 		}
 		Console.Write("  +---+---+---+---+---+---+---+---+");
 		Console.WriteLine();
+		Console.WriteLine("    a   b   c   d   e   f   g   h");
 		if (ctx.whiteTurn)
 		{
 			Console.WriteLine("(White Turn.)");
@@ -189,50 +194,55 @@ class BoardHelper
 
 	public static void TakeFrom(ChessContext ctx, IInputProvider inputProvider)
 	{
-        string errorMessage;
-        do
-        {
-            Console.WriteLine("Hangi taşı oynatmak istiyorsunuz? ");
-            ctx.inputFrom = Console.ReadLine();
-            ctx.inputFrom = ctx.inputFrom.ToLower();
-        int errorNo = IsValidFromToCondition(ctx.inputFrom, ctx.inputTo, ctx);
-            if (errorNo == 1 || errorNo == 4 || errorNo == 2 || errorNo == 3)
-            {
-                errorMessage = "Invalid From condition!!";
+		string errorMessage;
+		do
+		{
+			Console.WriteLine("Hangi taşı oynatmak istiyorsunuz? ");
+			ctx.inputFrom = Console.ReadLine();
+			ctx.inputFrom = ctx.inputFrom.ToLower();
+			int errorNo = IsValidFromToCondition(ctx.inputFrom, ctx.inputTo, ctx);
+			if (errorNo == 1 || errorNo == 4 || errorNo == 2 || errorNo == 3)
+			{
+				errorMessage = "Invalid From condition!!";
 
-                Console.WriteLine(errorMessage);
+				Console.WriteLine(errorMessage);
 			}
 			else
 			{
-                errorMessage = "";
-                ctx.touchedCell = BoardHelper.StringToCell(ctx.inputFrom, ctx);
+				errorMessage = "";
+				ctx.touchedCell = BoardHelper.StringToCell(ctx.inputFrom, ctx);
 
 			}
 			Console.WriteLine();
-        } while (errorMessage != "");
-    }
+		} while (errorMessage != "");
+	}
 
 
 
 	public static void TakeTo(ChessContext ctx, IInputProvider inputProvider)
 	{
-        string errorMessage = "";
-        do
-        {
-            Console.WriteLine("Nereye taşımak istiyorsunuz? ");
-            ctx.inputTo = Console.ReadLine();
-            ctx.inputTo = ctx.inputTo.ToLower();
-        int errorNo = IsValidFromToCondition(ctx.inputFrom, ctx.inputTo, ctx);
-            if (errorNo == 11 || errorNo == 5 || errorNo == 6 )
-            {
-                errorMessage = "Invalid From condition!!";
+		string errorMessage = "";
+		do
+		{
+			Console.WriteLine("Nereye taşımak istiyorsunuz? ");
+			ctx.inputTo = Console.ReadLine();
+			ctx.inputTo = ctx.inputTo.ToLower();
+			int errorNo = IsValidFromToCondition(ctx.inputFrom, ctx.inputTo, ctx);
+			if (errorNo == 11 || errorNo == 5 || errorNo == 6)
+			{
+				errorMessage = "Invalid To condition!!";
 
-                Console.WriteLine(errorMessage);
-            }
-            Console.WriteLine();
-        } while (errorMessage != "");
+				Console.WriteLine(errorMessage);
+			}
+			else
+			{
+				errorMessage = "";
 
-    }
+			}
+			Console.WriteLine();
+		} while (errorMessage != "");
+
+	}
 
 
 
@@ -275,7 +285,7 @@ class BoardHelper
 		ctx.board[toCell.Row, toCell.Col] = ctx.board[fromCell.Row, fromCell.Col];
 		ctx.board[fromCell.Row, fromCell.Col] = '.';
 
-		
+
 
 
 		// for passant movable
@@ -291,7 +301,7 @@ class BoardHelper
 		ctx.whiteTurn = !ctx.whiteTurn;
 		//last movements
 		ctx.lastFromCell = CellToCell(fromCell, ctx);
-		ctx.lastToCell = CellToCell(toCell,ctx);
+		ctx.lastToCell = CellToCell(toCell, ctx);
 
 
 		// did rooks move?
@@ -339,11 +349,31 @@ class BoardHelper
 		}
 
 
+        //recording data to list
+        string turn = ctx.whiteTurn ? "Black" : "White";
+
+        ctx.MoveHistory.Add($"{turn}: {ctx.lastFromCell.cellString}-{ctx.lastToCell.cellString}-{ctx.lastToCell.stone}");
+
 
 
 	}
 
 
+	public static void MoveHistoryPrinter(ChessContext ctx) {
+
+        Console.WriteLine("Move History: ");
+		int i = 1;
+        foreach (var m in ctx.MoveHistory)
+        {
+            string si = Convert.ToString(i);
+
+
+            Console.WriteLine($"{si}. {m}");
+			i++;
+
+
+        }
+    }
 
 	public static int IsValidFromToCondition(string from, string to, ChessContext ctx)
 	{
@@ -427,7 +457,10 @@ class BoardHelper
 		}
 		//direction -1 for white ,1for black
 		int dir = ctx.whiteTurn ? -1 : 1;
+		if(toCell.Row == 4&& toCell.Col == 2)
+		{
 
+		}
 
 
 		if (fromCell.Col == toCell.Col &&
@@ -722,7 +755,6 @@ class BoardHelper
 	public static bool IsWhitekingUnderThreat(ChessContext ctx)
 	{
 		(Cell whiteKing, _) = kingLocations(ctx);
-
 		//fro each order stone to white king location
 		for (int checkI = 0; checkI < 8; checkI++)
 		{
@@ -735,10 +767,14 @@ class BoardHelper
 				string fromCellOfThreat = IndexToString(checkI, checkJ);
 				ChessContext tempCtx = copyBoard(ctx);
 				Cell fromCellOfThreatCell = StringToCell(fromCellOfThreat, tempCtx);
+                if (fromCellOfThreatCell.stone == 'b')
+				{
 
-				// kendi taşın kendini tehtid edemeyeceği için renk değiştirdik
-				tempCtx.whiteTurn = false;
-				if (!fromCellOfThreatCell.IsBlack && MoveError(fromCellOfThreat, whiteKing.cellString, tempCtx) == "")
+				}
+
+                    // kendi taşın kendini tehtid edemeyeceği için renk değiştirdik
+                    tempCtx.whiteTurn = false;
+				if (!fromCellOfThreatCell.IsWhite && MoveError(fromCellOfThreat, whiteKing.cellString, tempCtx) == "")
 
                     return true;
 
@@ -812,74 +848,68 @@ class BoardHelper
 
 	public static void CheckGameEnd(ChessContext ctx)
 	{
+
+        bool hasLegalMove = false;
+        bool isWhiteTurn = ctx.whiteTurn;
+        bool kingUnderThreat = isWhiteTurn ? IsWhitekingUnderThreat(ctx) : IsBlackkingUnderThreat(ctx);
+
 		//the point in order for fromCEll
 		for (int i = 0; i < 8; i++)
 		{
 			for (int j = 0; j < 8; j++)
 			{
+				char fromch = ctx.board[i, j];
+
+				if (fromch == '.') continue;
+
+				if ((isWhiteTurn && !IsStoneWhiteC(fromch)) || (!isWhiteTurn && IsStoneWhiteC(fromch)))
+					continue;
+
 				string from = IndexToString(i, j);
-				char ch = ctx.board[i, j];
-				if (ch != '.') continue;
 				//toCell in order
 				for (int iTo = 0; iTo < 8; iTo++)
 				{
 					for (int jTo = 0; jTo < 8; jTo++)
 					{
-						if (i != iTo && j != jTo) continue;
+
+						if (i == iTo && j == jTo) continue;
 						string to = IndexToString(iTo, jTo);
-						ChessContext CheckEnd = copyBoard(ctx);
-						bool error = MoveError(from, to, CheckEnd) == "" ? false : true;
-						if (IsWhitekingUnderThreat(CheckEnd) && !error) break;
 
-						if (IsWhitekingUnderThreat(CheckEnd) && error)
+						ChessContext tempCtx = copyBoard(ctx);
+						string error = MoveError(from, to, tempCtx);
+
+						if (error == "")
 						{
-							ctx.blackWins = true;
+							hasLegalMove = true;
+							break;
 						}
-						else
-						{
-							ctx.blackWins = false;
-						}
-
-						if (IsBlackkingUnderThreat(CheckEnd) && error)
-						{
-							ctx.whiteWins = true;
-						}
-						else
-						{
-							ctx.whiteWins = false;
-
-						}
-
-						if((!IsWhitekingUnderThreat(CheckEnd) && !IsBlackkingUnderThreat(CheckEnd) && !error) ||
-							ctx.howMuchBlackkingMoved == 50 || ctx.howMuchWhitekingMoved == 50
-							)
-						{
-							ctx.drawStuation = true;
-
-						}
-						else
-						{
-							ctx.drawStuation = false;
-
-						}
-
-
 					}
+					if (hasLegalMove) break;
 				}
+				if (hasLegalMove) break;
 			}
+			if (hasLegalMove) break;
 		}
-
-		//ctx.isGameEnd = true;
-
-		//white king Draw by fifty-move rule
-		if (IsThereJustKing(ctx).Item1== true && ctx.howMuchWhitekingMoved == 50)
-		{
-			ctx.drawStuation = true;
-		} else if(IsThereJustKing(ctx).Item2 == true&& ctx.howMuchBlackkingMoved == 50)
-		{
-			ctx.drawStuation = true;
-		}
-
+        ctx.whiteWins = false;
+        ctx.blackWins = false;
+        ctx.drawStuation = false;
+        
+		if (!hasLegalMove && kingUnderThreat)
+        {
+            if (isWhiteTurn)
+                ctx.blackWins = true;
+            else
+                ctx.whiteWins = true;
+        }
+        else if (!hasLegalMove && !kingUnderThreat)
+        {
+            ctx.drawStuation = true;
+        }
+        else if (ctx.howMuchBlackkingMoved == 50 || ctx.howMuchWhitekingMoved == 50 ||
+                 (IsThereJustKing(ctx).Item1 && IsThereJustKing(ctx).Item2))
+        {
+            ctx.drawStuation = true;
+        }
 
 
 	}
@@ -911,7 +941,7 @@ class BoardHelper
 		return (whiteKing, blackKing);
 	}
 
-
+	
 
 
 
@@ -977,7 +1007,7 @@ class BoardHelper
 			
 			return "Cannot Whites Move Owm Stone";
 		}
-		if (fromCell.IsBlack & (fromCell.IsBlack & !toCell.isEmpty))
+		if (fromCell.IsBlack & (toCell.IsBlack & !toCell.isEmpty))
 		{
 		   return "Cannot Blacks Move Owm Stone";   
 		}
@@ -1159,12 +1189,12 @@ class Program
 		ChessContext ctx = new ChessContext();
 		ctx.board = new char[8, 8]{
 		{ 'r', 'n', 'b', 'q', 'k', 'b', 'n', 'r' }, // 8. sıra (siyah)
-		{ 'p', 'p', 'p', 'p', 'p', 'p', 'p', 'p' },
+		{ 'p', 'p', 'p', '.', '.', '.', 'p', 'p' },
 		{ '.', '.', '.', '.', '.', '.', '.', '.' },
+		{ '.', '.', '.', '.', 'R', '.', '.', '.' },
+		{ '.', 'b', '.', '.', '.', '.', '.', '.' },
 		{ '.', '.', '.', '.', '.', '.', '.', '.' },
-		{ '.', '.', '.', '.', '.', '.', '.', '.' },
-		{ '.', '.', '.', '.', '.', '.', '.', '.' },
-		{ 'P', 'P', 'P', 'P', 'P', 'P', 'P', 'P' },
+		{ 'P', 'P', 'P', '.', '.', '.', 'P', 'P' },
 		{ 'R', 'N', 'B', 'Q', 'K', 'B', 'N', 'R' }  // 1. sıra (beyaz)
 		};
 
@@ -1195,7 +1225,20 @@ class Program
                     Console.WriteLine(error);
                 }
                 BoardHelper.PrintBoard(ref ctx);
+
             }
+
+
+
+			// Write History Move 
+			BoardHelper.MoveHistoryPrinter(ctx);
+			
+
+
+
+
+
+
             //if just king is left  
             if (BoardHelper.IsThereJustKing(ctx).Item1)
 			{
@@ -1208,21 +1251,22 @@ class Program
 			}
 
 
-
-			// Check if the game has ended
-			if (ctx.whiteWins)
+			BoardHelper.CheckGameEnd(ctx);
+            // Check if the game has ended
+            if (ctx.whiteWins)
 			{
 				Console.WriteLine(" Whites Won.:)");
+				break;
 			}
 			else if (ctx.blackWins)
 			{
 				Console.WriteLine(" Blacks Won.:)");
-
+				break;
 			}
 			else if (ctx.drawStuation)
 			{
 				Console.WriteLine(" There is not Winner. Draw :)");
-
+				break;
 			}
 			
 
