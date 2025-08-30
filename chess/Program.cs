@@ -781,18 +781,21 @@ class BoardHelper
 				string fromCellOfThreat = IndexToString(checkI, checkJ);
 				ChessContext tempCtx = copyBoard(ctx);
 				Cell fromCellOfThreatCell = StringToCell(fromCellOfThreat, tempCtx);
-                if (fromCellOfThreatCell.stone == 'b')
+
+                if (fromCellOfThreatCell.stone == 'q'&& whiteKing.cellString == "d1")
 				{
 
 				}
 
                     // kendi taşın kendini tehtid edemeyeceği için renk değiştirdik
                     tempCtx.whiteTurn = false;
+			
 				if (!fromCellOfThreatCell.IsWhite && MoveError(fromCellOfThreat, whiteKing.cellString, tempCtx) == "")
 
                     return true;
 
 			}
+			
 
 		}
 		return false;
@@ -1074,44 +1077,47 @@ class BoardHelper
 
 
 			ChessContext movableCtx2 = copyBoard(ctx);
+			movableCtx2.IsFakeMovement = true;
 			if (IsValidCastlingMove(fromCell, toCell, movableCtx2))
 				{
-				bool isWhiteKingUnderCheckInRouta = IsWhitekingUnderThreat(movableCtx2);
 				bool isBlackKingUnderCheckInRouta = IsBlackkingUnderThreat(movableCtx2);
+				bool isWhiteKingUnderCheckInRouta = IsWhitekingUnderThreat(movableCtx2);
 
 				(Cell whiteKing,Cell blackKing) = kingLocations(movableCtx2);
-
 				if (!IsWhitekingUnderThreat(ctx))
 				{
+				//long white casling
 					if (toCell.cellIndex == (7, 2))
 					{
 						MoveStone(whiteKing.cellString, "d1", movableCtx2);
-
-						if (isWhiteKingUnderCheckInRouta)
+                        isWhiteKingUnderCheckInRouta = IsWhitekingUnderThreat(movableCtx2);
+                        if (isWhiteKingUnderCheckInRouta)
 						{
 							return "White King Under Check in Long Casling Routa.";
 						}
 
 						MoveStone("d1", "c1", movableCtx2);
-
-						if (isWhiteKingUnderCheckInRouta)
+                        isWhiteKingUnderCheckInRouta = IsWhitekingUnderThreat(movableCtx2);
+                        if (isWhiteKingUnderCheckInRouta)
 						{
 							return "White King Under Check in Long Casling Routa.";
 						}
 
 
 					}
-
+					//short white caslting
 					else if (toCell.cellIndex == (7, 6))
 					{
 
 						MoveStone(whiteKing.cellString, "f1", movableCtx2);
-						if (isWhiteKingUnderCheckInRouta)
+                        isWhiteKingUnderCheckInRouta = IsWhitekingUnderThreat(movableCtx2);
+                        if (isWhiteKingUnderCheckInRouta)
 						{
 							return "White King Under Check in Short Casling Routa.";
 						}
 						MoveStone("f1", "g1", movableCtx2);
-						if (isWhiteKingUnderCheckInRouta)
+                        isWhiteKingUnderCheckInRouta = IsWhitekingUnderThreat(movableCtx2);
+                        if (isWhiteKingUnderCheckInRouta)
 						{
 							return "White King Under Check in Short Casling Routa.";
 						}
@@ -1121,32 +1127,38 @@ class BoardHelper
 
 				if (!IsBlackkingUnderThreat(ctx))
 				{
+					//long black castling
 					if (toCell.cellIndex == (0, 2))
 					{
 						MoveStone(blackKing.cellString, "d8", movableCtx2);
-						if (isBlackKingUnderCheckInRouta)
+                        isBlackKingUnderCheckInRouta = IsBlackkingUnderThreat(movableCtx2);
+                        if (isBlackKingUnderCheckInRouta)
 						{
 							return "Black King Under Check in Long Casling Routa.";
 						}
 						MoveStone("d8", "c8", movableCtx2);
-						if (isBlackKingUnderCheckInRouta)
+                        isBlackKingUnderCheckInRouta = IsBlackkingUnderThreat(movableCtx2);
+                        if (isBlackKingUnderCheckInRouta)
 						{
 							return "Black King Under Check in Long Casling Routa.";
 						}
 
 					}
+					// short black castling
 					else if (toCell.cellIndex == (0, 6))
 					{
 						MoveStone(blackKing.cellString, "f8", movableCtx2);
+                        isBlackKingUnderCheckInRouta = IsBlackkingUnderThreat(movableCtx2);
 
-						if (isBlackKingUnderCheckInRouta)
+                        if (isBlackKingUnderCheckInRouta)
 						{
 							return "Black King Under Check in Short Casling Routa.";
 						}
 
 						MoveStone("f8", "g8", movableCtx2);
+                        isBlackKingUnderCheckInRouta = IsBlackkingUnderThreat(movableCtx2);
 
-						if (isBlackKingUnderCheckInRouta)
+                        if (isBlackKingUnderCheckInRouta)
 						{
 							return "Black King Under Check in Short Casling Routa.";
 						}
@@ -1164,9 +1176,6 @@ class BoardHelper
 
 
 	}
-
-	
-
 }
 
 
@@ -1209,10 +1218,10 @@ class Program
 		{ 'p', 'p', 'p', '.', '.', '.', 'p', 'p' },
 		{ '.', '.', '.', '.', '.', '.', '.', '.' },
 		{ '.', '.', '.', '.', 'R', '.', '.', '.' },
-		{ '.', 'b', '.', '.', '.', '.', '.', '.' },
+		{ '.', '.', '.', '.', '.', '.', '.', '.' },
 		{ '.', '.', '.', '.', '.', '.', '.', '.' },
 		{ 'P', 'P', 'P', '.', '.', '.', 'P', 'P' },
-		{ 'R', 'N', 'B', 'Q', 'K', 'B', 'N', 'R' }  // 1. sıra (beyaz)
+		{ 'R', '.', '.', '.', 'K', '.', '.', 'R' }  // 1. sıra (beyaz)
 		};
 
 		IInputProvider inputProvider = new ConsoleInputProvider();
