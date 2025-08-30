@@ -1,4 +1,5 @@
-﻿using System;
+﻿using chess;
+using System;
 using System.ComponentModel.Design;
 using System.Diagnostics;
 using System.Linq.Expressions;
@@ -10,7 +11,7 @@ class Cell
 {
 	public int Row { get; }
 	public int Col { get; }
-    public char stone { get; }
+    public char stone { get; set; }
 
 	public (int, int) cellIndex => (Row,Col);
 	public string cellString => BoardHelper.IndexToString(Row, Col);
@@ -77,7 +78,7 @@ class ChessContext
 
 
 
-	public List<string> MoveHistory { get; set; } = new List<string>();
+	public List<chess.Move> MoveHistory { get; set; } = new List<chess.Move>();
 
 
 	
@@ -254,6 +255,8 @@ class BoardHelper
 		Cell fromCell = StringToCell(from, ctx);
 		Cell toCell = StringToCell(to, ctx);
 
+
+
 		if (IsValidCastlingMove(fromCell, toCell, ctx))
 		{
 			//castling move
@@ -297,15 +300,15 @@ class BoardHelper
 		}
 
 
-		//Turn change
-		ctx.whiteTurn = !ctx.whiteTurn;
-		//last movements
-		ctx.lastFromCell = CellToCell(fromCell, ctx);
-		ctx.lastToCell = CellToCell(toCell, ctx);
+        //last movements
+        ctx.lastFromCell = CellToCell(fromCell, ctx);
+        ctx.lastToCell = CellToCell(toCell, ctx);
+		ctx.lastToCell.stone = toCell.stone;
+		ctx.lastFromCell.stone = fromCell.stone;
 
 
-		// did rooks move?
-		if (!ctx.whiteQueensideRookMoved && ctx.lastFromCell.stone == 'R' && ctx.lastFromCell.cellIndex == (7, 0))
+        // did rooks move?
+        if (!ctx.whiteQueensideRookMoved && ctx.lastFromCell.stone == 'R' && ctx.lastFromCell.cellIndex == (7, 0))
 		{
 			ctx.whiteQueensideRookMoved = true;
 
@@ -349,30 +352,41 @@ class BoardHelper
 		}
 
 
-        //recording data to list
-        string turn = ctx.whiteTurn ? "Black" : "White";
+		//recording data to list
+		var move = new Move
+		{
+			From = ctx.lastFromCell.cellString,
+			To = ctx.lastToCell.cellString,
+			Piece = ctx.lastFromCell.stone,
+			Captured = ctx.lastToCell.isEmpty ? '.' : ctx.lastFromCell.stone,
+			TurnNumber = (ctx.MoveHistory.Count / 2) + 1,
+			IsWhiteTurn = ctx.whiteTurn,
+		};
+        ctx.MoveHistory.Add(move);
 
-        ctx.MoveHistory.Add($"{turn}: {ctx.lastFromCell.cellString}-{ctx.lastToCell.cellString}-{ctx.lastToCell.stone}");
 
 
-
+		//Turn change
+		ctx.whiteTurn = !ctx.whiteTurn;
 	}
 
 
 	public static void MoveHistoryPrinter(ChessContext ctx) {
 
         Console.WriteLine("Move History: ");
-		int i = 1;
-        foreach (var m in ctx.MoveHistory)
+        for (int i = 0; i < ctx.MoveHistory.Count; i++)
         {
-            string si = Convert.ToString(i);
+            var move = ctx.MoveHistory[i];
 
-
-            Console.WriteLine($"{si}. {m}");
-			i++;
-
-
+            if (move.IsWhiteTurn)
+                Console.Write($"{move} ");
+            else
+                Console.WriteLine(move);
         }
+		if (ctx.MoveHistory.Count % 2 == 1)
+		{
+			Console.WriteLine();
+		}
     }
 
 	public static int IsValidFromToCondition(string from, string to, ChessContext ctx)
@@ -1150,6 +1164,9 @@ class BoardHelper
 
 
 	}
+
+	
+
 }
 
 
@@ -1201,6 +1218,7 @@ class Program
 		IInputProvider inputProvider = new ConsoleInputProvider();
 
         BoardHelper.PrintBoard(ref ctx);
+			int i = 0;
 		while (true)
 		{
             BoardHelper.TakeFrom(ctx, inputProvider);
@@ -1229,18 +1247,16 @@ class Program
             }
 
 
-
-			// Write History Move 
+			//Write History Move
 			BoardHelper.MoveHistoryPrinter(ctx);
-			
+			//Console.WriteLine($"Last Move: {ctx.MoveHistory.Last()}");
 
 
 
 
 
-
-            //if just king is left  
-            if (BoardHelper.IsThereJustKing(ctx).Item1)
+			//if just king is left  
+			if (BoardHelper.IsThereJustKing(ctx).Item1)
 			{
 				Console.WriteLine($"White King moved {ctx.howMuchWhitekingMoved} times.");
 			}
