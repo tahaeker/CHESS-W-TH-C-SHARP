@@ -24,54 +24,6 @@ namespace chess
 
         }
 
-        public static void UndoMove(ChessContext ctx)
-        {
-            if (ctx.MoveHistory.Count == 0)
-            {
-                Console.WriteLine("There is not a move can be undo!");
-                return;
-            }
-
-            
-            var lastMove = ctx.MoveHistory.Last();
-
-
-            var (fromRow, fromCol) = BoardHelper.StringToIndex(lastMove.From);
-            var (toRow, toCol) = BoardHelper.StringToIndex(lastMove.To);
-           
-            
-            //return 
-            ctx.board[fromRow, fromCol] = ctx.board[toRow, toCol];
-            ctx.board[toRow, toCol] = lastMove.Captured == '.' ? ctx.empty : lastMove.Captured;
-            
-            
-            
-            // deleting the move from the past
-            ctx.MoveHistory.RemoveAt(ctx.MoveHistory.Count - 1);
-
-            var BeforeLast = ctx.MoveHistory.Last();
-
-            var (beforeFromRow, beforeFromCol) = BoardHelper.StringToIndex(BeforeLast.From);
-            var (beforeToRow, beforeToCol) = BoardHelper.StringToIndex(BeforeLast.To);
-            
-            // updating
-            ctx.lastFromCell = new Cell(beforeFromRow, beforeFromCol, ctx);
-            ctx.lastToCell = new Cell(beforeToRow, beforeToCol, ctx);
-
-
-            // Change order back
-            ctx.whiteTurn = !ctx.whiteTurn;
-
-            Console.WriteLine($"Hamle geri alındı: {lastMove}");
-
-        }
-
-
-
-
-
-
-
 
     }
 

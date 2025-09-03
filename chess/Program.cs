@@ -7,7 +7,7 @@ using System.Runtime.CompilerServices;
 using System.Security.Cryptography;
 
 
-class Cell
+struct Cell
 {
 	public int Row { get; }
 	public int Col { get; }
@@ -129,70 +129,6 @@ class BoardHelper
 
 	}
 
-
-
-	public static void PrintBoard(ref ChessContext ctx)
-	{
-		Console.WriteLine("    a   b   c   d   e   f   g   h");
-
-		for (int i = 0; i < ctx.board.GetLength(0); i++)//0satır 1 stn
-		{
-			Console.Write("  ");
-			for (int m = 0; m < Math.Sqrt(ctx.board.Length); m++)
-			{
-				Console.Write("+---");
-			}
-			Console.Write("+");
-			Console.WriteLine();
-
-			Console.Write(8 - i + " | ");
-
-			for (int j = 0; j < 8; j++)
-			{
-				if (ctx.board[i, j] == ctx.board[0, 1])
-				{
-
-				}
-				char stone = ctx.board[i, j];
-
-				if (ctx.inputFrom != "")
-				{
-					string pos = IndexToString(i, j);
-					string moveError = MoveError(ctx.inputFrom, pos, ctx);
-
-					if (i == ctx.touchedCell.Row && j == ctx.touchedCell.Col)
-					{
-						Console.ForegroundColor = ConsoleColor.Red;
-					}
-					else if (moveError == "")
-					{
-						Console.ForegroundColor = ConsoleColor.Green;
-					}
-				}
-
-				Console.Write(stone);
-				Console.ResetColor();
-				Console.Write(" | ");
-			}
-			Console.WriteLine();
-		}
-		Console.Write("  +---+---+---+---+---+---+---+---+");
-		Console.WriteLine();
-		Console.WriteLine("    a   b   c   d   e   f   g   h");
-		if (ctx.whiteTurn)
-		{
-			Console.WriteLine("(White Turn.)");
-		}
-		else if (!ctx.whiteTurn)
-		{
-			Console.WriteLine("(Black Turn.)");
-		}
-
-
-	}
-
-
-
 	public static void TakeFrom(ChessContext ctx, IInputProvider inputProvider)
 	{
 		string errorMessage;
@@ -247,128 +183,6 @@ class BoardHelper
 
 
 
-
-
-
-	public static void MoveStone(string from, string to, ChessContext ctx)
-	{
-		Cell fromCell = StringToCell(from, ctx);
-		Cell toCell = StringToCell(to, ctx);
-
-
-
-		if (IsValidCastlingMove(fromCell, toCell, ctx))
-		{
-			//castling move
-			if (fromCell.cellIndex == (7, 4) && toCell.cellIndex == (7, 2))//white queenside castling
-			{
-				ctx.board[7, 0] = '.';
-				ctx.board[7, 3] = 'R';
-			}
-			else if (fromCell.cellIndex == (7, 4) && toCell.cellIndex == (7, 6))//white kingside castling
-			{
-				ctx.board[7, 7] = '.';
-				ctx.board[7, 5] = 'R';
-			}
-			else if (fromCell.cellIndex == (0, 4) && toCell.cellIndex == (0, 2))//black queenside castling
-			{
-				ctx.board[0, 0] = '.';
-				ctx.board[0, 3] = 'r';
-			}
-			else if (fromCell.cellIndex == (0, 4) && toCell.cellIndex == (0, 6))//black kingside castling
-			{
-				ctx.board[0, 7] = '.';
-				ctx.board[0, 5] = 'r';
-			}
-		}
-
-
-
-
-		ctx.board[toCell.Row, toCell.Col] = ctx.board[fromCell.Row, fromCell.Col];
-		ctx.board[fromCell.Row, fromCell.Col] = '.';
-
-
-
-
-		// for passant movable
-		if (char.ToLower(ctx.lastFromCell.stone) == 'p' &&
-			char.ToLower(ctx.lastToCell.stone) == 'p')
-		{
-			int dir = ctx.whiteTurn ? -1 : 1;
-			ctx.board[toCell.Row - dir, toCell.Col] = '.';
-		}
-
-
-        //last movements
-        ctx.lastFromCell = CellToCell(fromCell, ctx);
-        ctx.lastToCell = CellToCell(toCell, ctx);
-		ctx.lastToCell.stone = toCell.stone;
-		ctx.lastFromCell.stone = fromCell.stone;
-
-
-        // did rooks move?
-        if (!ctx.whiteQueensideRookMoved && ctx.lastFromCell.stone == 'R' && ctx.lastFromCell.cellIndex == (7, 0))
-		{
-			ctx.whiteQueensideRookMoved = true;
-
-		} else if (!ctx.whiteKingsideRookMoved && ctx.lastFromCell.stone == 'R' && ctx.lastFromCell.cellIndex == (7, 7))
-		{
-			ctx.whiteKingsideRookMoved = true;
-
-		} else if (!ctx.blackQueensideRookMoved && ctx.lastFromCell.stone == 'r' && ctx.lastFromCell.cellIndex == (0, 0))
-		{
-
-			ctx.blackQueensideRookMoved = true;
-
-		} else if (!ctx.blackKingsideRookMoved && ctx.lastFromCell.stone == 'r' && ctx.lastFromCell.cellIndex == (0, 7))
-		{
-			ctx.blackKingsideRookMoved = true;
-		}
-
-		// did kings move?
-		if (!ctx.blackKingMoved && ctx.lastFromCell.stone == 'k' && ctx.lastFromCell.cellIndex == (0, 4))
-		{
-
-			ctx.blackKingMoved = true;
-
-		}
-		if (!ctx.whiteKingMoved && ctx.lastFromCell.stone == 'K' && ctx.lastFromCell.cellIndex == (7, 4))
-		{
-
-			ctx.whiteKingMoved = true;
-
-		}
-
-		//how many the kimg moved?
-		if (IsThereJustKing(ctx).Item1 && ctx.lastFromCell.stone == 'K')
-		{
-			// yanlış ctx.howMuchWhitekingMoved = ctx.howMuchWhitekingMoved++;
-			ctx.howMuchWhitekingMoved++;
-		} else if (IsThereJustKing(ctx).Item2 && ctx.lastFromCell.stone == 'k')
-		{
-			//yanlış ctx.howMuchWhitekingMoved = ctx.howMuchWhitekingMoved++;
-			ctx.howMuchBlackkingMoved++;
-		}
-
-
-		//recording data to list
-		var move = new Move
-		{
-			From = ctx.lastFromCell.cellString,
-			To = ctx.lastToCell.cellString,
-			Piece = ctx.lastFromCell.stone,
-			Captured = ctx.lastToCell.isEmpty ? '.' : ctx.lastFromCell.stone,
-			TurnNumber = (ctx.MoveHistory.Count / 2) + 1,
-			IsWhiteTurn = ctx.whiteTurn,
-		};
-        ctx.MoveHistory.Add(move);
-
-
-
-		//Turn change
-		ctx.whiteTurn = !ctx.whiteTurn;
-	}
 
 
 	public static void MoveHistoryPrinter(ChessContext ctx) {
@@ -461,281 +275,26 @@ class BoardHelper
 	}
 	
 
-
-
-	public static bool IsValidPawnMove(Cell fromCell, Cell toCell, ChessContext ctx)
-	{
-		if (char.ToLower(fromCell.stone) != 'p')// parametreye dikkat et ilk başta hepsi string tanımlı
-		{
-			return false;
-		}
-		//direction -1 for white ,1for black
-		int dir = ctx.whiteTurn ? -1 : 1;
-		if(toCell.Row == 4&& toCell.Col == 2)
-		{
-
-		}
-
-
-		if (fromCell.Col == toCell.Col &&
-			toCell.Row - fromCell.Row == dir &&
-			toCell.isEmpty)		{
-			return true;
-		} //start point of the pawm
-		else if (
-			fromCell.Col == toCell.Col && toCell.Row - fromCell.Row == 2 * dir &&
-			(fromCell.Row == 1 || fromCell.Row == 6) &&
-			toCell.isEmpty &&
-			ctx.board[fromCell.Row + dir, fromCell.Col] == '.')
-		{
-			return true;
-		}
-
-
-		//çapraz yemek için
-		if (
-			(!toCell.isEmpty && (toCell.Col - fromCell.Col == dir) && (toCell.Row - fromCell.Row == dir)) ||
-			(!toCell.isEmpty && (toCell.Col - fromCell.Col == -dir) && (toCell.Row - fromCell.Row == dir))
-			)
-		{
-			return true;
-		}
-		// passant move
-		if (char.ToLower(ctx.lastFromCell.stone) == 'p' && ctx.lastToCell.Col == toCell.Col &&
-			(
-			(ctx.lastFromCell.Row == 6 && fromCell.Row == 4 && (toCell.Row - fromCell.Row == dir) && (toCell.Col - fromCell.Col == -dir)) ||
-			(ctx.lastFromCell.Row == 6 && fromCell.Row == 4 && (toCell.Row - fromCell.Row == dir) && (toCell.Col - fromCell.Col == dir)) ||
-			(ctx.lastFromCell.Row == 1 && fromCell.Row == 3 && (toCell.Row - fromCell.Row == dir) && (toCell.Col - fromCell.Col == dir)) ||
-			(ctx.lastFromCell.Row == 1 && fromCell.Row == 3 && (toCell.Row - fromCell.Row == dir) && (toCell.Col - fromCell.Col == -dir))
-			)
-			)
-		{
-			return true;
-		}
-
-		return false;
-	}
+	
 
 
 
 
-	public static bool IsValidRookMove(Cell fromCell, Cell toCell, ChessContext ctx)
-	{
-		if (char.ToLower(fromCell.stone) != 'r' &&
-			char.ToLower(fromCell.stone) != 'q')// parametreye dikkat et ilk başta hepsi string tanımlı
-		{
-			return false;
-		}
-
-		//yatay sağa doğru
-		if (fromCell.Row == toCell.Row &&
-			toCell.Col != fromCell.Col
-			)
-		{
-			int yDirectionStep = (toCell.Col > fromCell.Col) ? 1 : -1;
-
-			for (int j = (fromCell.Col + yDirectionStep); j != toCell.Col; j += yDirectionStep)
-			{
-				if (ctx.board[fromCell.Row, j] != '.')
-
-					return false;
-			}
-
-
-		}
-		else if (fromCell.Row != toCell.Row &&
-		fromCell.Col == toCell.Col)
-		{
-			int xDirectionStep = (toCell.Row > fromCell.Row) ? 1 : -1;//dikey
-
-			for (int i = fromCell.Row + xDirectionStep; i != toCell.Row; i += xDirectionStep)
-			{
-				if (ctx.board[i, fromCell.Col] != '.') return false;
-			}
-		} else
-		{
-			return false;
-		}
-
-		return true;
-	}
+	
 
 
 
-
-	public static bool IsValidKnightMove(Cell fromCell, Cell toCell, ChessContext ctx)
-	{
-
-		if (toCell.Row == fromCell.Row - 2 &&
-			((toCell.Col == fromCell.Col - 1) || (toCell.Col == fromCell.Col + 1))
-			)
-		{
-			return true;
-		}
-		else if (toCell.Col == fromCell.Col - 2 &&
-			((toCell.Row == fromCell.Row - 1) || toCell.Row == fromCell.Row + 1)
-			)
-		{
-			return true;
-		}
-		else if (toCell.Row == fromCell.Row + 2 &&
-			((toCell.Col == fromCell.Col + 1) || (toCell.Col == fromCell.Col - 1))
-			)
-		{
-			return true;
-		}
-		else if (toCell.Col == fromCell.Col + 2 &&
-			((toCell.Row == fromCell.Row - 1) || toCell.Row == fromCell.Row + 1)
-			)
-		{
-			return true;
-		}
-
-
-		return false;
-	}
+	
 
 
 
-	public static bool IsValidBishopMove(Cell fromCell, Cell toCell, ChessContext ctx)
-	{
-		if (char.ToLower(fromCell.stone) != 'b' &&
-			char.ToLower(fromCell.stone) != 'q')// parametreye dikkat et ilk başta hepsi string tanımlı
-		{
-			return false;
-		}
-
-		int deltaI = toCell.Row - fromCell.Row;
-		int deltaJ = toCell.Col - fromCell.Col;
-		//çapraz olmalı
-		if (Math.Abs(deltaI) != Math.Abs(deltaJ))
-		{
-			return false;
-		}
+	
 
 
-		// direction yönü neresi
-		int dirI = deltaI > 0 ? 1 : -1;
-		int dirJ = deltaJ > 0 ? 1 : -1;
-
-		int steps = Math.Abs(deltaI);// kaç adım ilelrlesin
-		for (int k = 1; k < steps; k++)// ara karelere bakıp taş varsa false döner
-		{
-			int checkI = fromCell.Row + dirI * k;
-			int checkJ = fromCell.Col + dirJ * k;
-			if (ctx.board[checkI, checkJ] != '.')
-			{
-				return false;
-			}
-
-		}
-
-		return true;
-	}
+	
 
 
-
-	public static bool IsValidQueenMove(Cell fromCell, Cell toCell, ChessContext ctx)
-	{
-		if (IsValidBishopMove(fromCell, toCell, ctx) ||
-			IsValidRookMove(fromCell, toCell, ctx))
-		{
-			return true;
-		}
-		return false;
-	}
-
-
-	public static bool IsValidKingMove(Cell fromCell, Cell toCell, ChessContext ctx)
-	{
-	  
-		// direction 
-		int deltaI = toCell.Row - fromCell.Row;
-		int deltaJ = toCell.Col - fromCell.Col;
-		int dirI = deltaI > 0 ? 1 : -1;
-		int dirJ = deltaJ > 0 ? 1 : -1;
-
-		//for normal movement 
-		if ((Math.Abs(fromCell.Row - toCell.Row) == 1 && Math.Abs(fromCell.Col - toCell.Col) == 1) ||
-		(Math.Abs(fromCell.Row - toCell.Row) == 1 && Math.Abs(fromCell.Col - toCell.Col) == 0) ||
-		(Math.Abs(fromCell.Row - toCell.Row) == 0 && Math.Abs(fromCell.Col - toCell.Col) == 1))
-		{
-			return true;
-		}
-
-		// does king check in routa
-
-
-		if (!ctx.IsFakeMovement)
-		{
-			ChessContext tempCtx = copyBoard(ctx);
-			tempCtx.IsFakeMovement = true;
-
-			if (IsValidCastlingMove(fromCell, toCell, tempCtx))
-			{
-				return true;
-			}
-		}
-	   
-
-
-			return false;
-
-	}
-
-
-	public static bool IsValidCastlingMove(Cell fromCell, Cell toCell, ChessContext ctx)
-	{
-
-		ChessContext tempCtx;
-		tempCtx = copyBoard(ctx);
-		tempCtx.IsFakeMovement = true;
-
-		if (ctx.whiteTurn && IsWhitekingUnderThreat(ctx))
-		{
-			return false;
-		}
-
-		if(!ctx.whiteTurn && IsBlackkingUnderThreat(ctx))
-		{
-			return false;
-		}
-
-		if (fromCell.cellIndex == (7, 4) && toCell.cellIndex == (7, 2) &&
-		ctx.board[7, 2] == ctx.empty && ctx.board[7, 3] == ctx.empty &&
-		!ctx.whiteQueensideRookMoved && ctx.board[7,0] != ctx.empty && !ctx.whiteKingMoved)
-		{
-			return true;
-		}
-		else if (fromCell.cellIndex == (7, 4) && toCell.cellIndex == (7, 6) &&
-			ctx.board[7, 5] == ctx.empty && ctx.board[7, 6] == ctx.empty &&
-			!ctx.whiteKingsideRookMoved && ctx.board[7, 7] != ctx.empty && !ctx.whiteKingMoved)
-		{
-			return true;
-		}
-
-
-
-		//black king castling
-		if (fromCell.cellIndex == (0, 4) && toCell.cellIndex == (0, 2) &&
-		ctx.board[0, 2] == ctx.empty && ctx.board[0, 3] == ctx.empty &&
-		!ctx.blackQueensideRookMoved && ctx.board[0, 0] != ctx.empty && !ctx.blackKingMoved)
-		{
-			return true;
-		}
-		else if (fromCell.cellIndex == (0, 4) && toCell.cellIndex == (0, 6) &&
-			ctx.board[0, 5] == ctx.empty && ctx.board[0, 6] == ctx.empty &&
-			!ctx.blackKingsideRookMoved && ctx.board[0, 7] != ctx.empty && !ctx.blackKingMoved)
-		{
-			return true;
-		}
-		
-
-		
-
-
-		return false;
-	}
+	
 
 	public static (Cell, Cell) kingLocations(ChessContext ctx)
 	{
@@ -1032,27 +591,27 @@ class BoardHelper
 		switch (char.ToLower(fromCell.stone))
 		{
 			case 'p':
-				if (!IsValidPawnMove(fromCell, toCell, ctx))
+				if (!MoveValidator.IsValidPawnMove(fromCell, toCell, ctx))
 					return "Invalid pawn move!";
 				break;
 			case 'r':
-				if (!IsValidRookMove(fromCell, toCell, ctx))
+				if (!MoveValidator.IsValidRookMove(fromCell, toCell, ctx))
 					return "Invalid rook move!";
 				break;
 			case 'n':
-				if (!IsValidKnightMove(fromCell, toCell, ctx))
+				if (!MoveValidator.IsValidKnightMove(fromCell, toCell, ctx))
 					return "Invalid knight move!";
 				break;
 			case 'b':
-				if (!IsValidBishopMove(fromCell, toCell, ctx))
+				if (!MoveValidator.IsValidBishopMove(fromCell, toCell, ctx))
 					return "Invalid bishop move!";
 				break;
 			case 'q':
-				if (!IsValidQueenMove(fromCell, toCell, ctx))
+				if (!MoveValidator.IsValidQueenMove(fromCell, toCell, ctx))
 					return "ınvalid queen move!";
 				break;
 			case 'k':
-				if (!IsValidKingMove(fromCell, toCell, ctx))
+				if (!MoveValidator.IsValidKingMove(fromCell, toCell, ctx))
 					return "Invalid king move!";
 				break;
 
@@ -1064,7 +623,7 @@ class BoardHelper
 			ChessContext nextCtx = copyBoard(ctx);
 			nextCtx.IsFakeMovement = true; // to prevent stack overflow exception
 
-			MoveStone(fromCell.cellString, toCell.cellString, nextCtx);
+			ChessEngine.MoveStone(fromCell.cellString, toCell.cellString, nextCtx);
 
 			if (nextCtx.whiteTurn && IsBlackkingUnderThreat(nextCtx))
 				return "Black king is under threat";
@@ -1074,11 +633,11 @@ class BoardHelper
 
 
 
-
+			
 
 			ChessContext movableCtx2 = copyBoard(ctx);
 			movableCtx2.IsFakeMovement = true;
-			if (IsValidCastlingMove(fromCell, toCell, movableCtx2))
+			if (MoveValidator.IsValidCastlingMove(fromCell, toCell, movableCtx2))
 				{
 				bool isBlackKingUnderCheckInRouta = IsBlackkingUnderThreat(movableCtx2);
 				bool isWhiteKingUnderCheckInRouta = IsWhitekingUnderThreat(movableCtx2);
@@ -1089,14 +648,14 @@ class BoardHelper
 				//long white casling
 					if (toCell.cellIndex == (7, 2))
 					{
-						MoveStone(whiteKing.cellString, "d1", movableCtx2);
+						ChessEngine.MoveStone(whiteKing.cellString, "d1", movableCtx2);
                         isWhiteKingUnderCheckInRouta = IsWhitekingUnderThreat(movableCtx2);
                         if (isWhiteKingUnderCheckInRouta)
 						{
 							return "White King Under Check in Long Casling Routa.";
 						}
 
-						MoveStone("d1", "c1", movableCtx2);
+                        ChessEngine.MoveStone("d1", "c1", movableCtx2);
                         isWhiteKingUnderCheckInRouta = IsWhitekingUnderThreat(movableCtx2);
                         if (isWhiteKingUnderCheckInRouta)
 						{
@@ -1109,13 +668,13 @@ class BoardHelper
 					else if (toCell.cellIndex == (7, 6))
 					{
 
-						MoveStone(whiteKing.cellString, "f1", movableCtx2);
+                        ChessEngine.MoveStone(whiteKing.cellString, "f1", movableCtx2);
                         isWhiteKingUnderCheckInRouta = IsWhitekingUnderThreat(movableCtx2);
                         if (isWhiteKingUnderCheckInRouta)
 						{
 							return "White King Under Check in Short Casling Routa.";
 						}
-						MoveStone("f1", "g1", movableCtx2);
+						ChessEngine.MoveStone("f1", "g1", movableCtx2);
                         isWhiteKingUnderCheckInRouta = IsWhitekingUnderThreat(movableCtx2);
                         if (isWhiteKingUnderCheckInRouta)
 						{
@@ -1130,13 +689,13 @@ class BoardHelper
 					//long black castling
 					if (toCell.cellIndex == (0, 2))
 					{
-						MoveStone(blackKing.cellString, "d8", movableCtx2);
+						ChessEngine.MoveStone(blackKing.cellString, "d8", movableCtx2);
                         isBlackKingUnderCheckInRouta = IsBlackkingUnderThreat(movableCtx2);
                         if (isBlackKingUnderCheckInRouta)
 						{
 							return "Black King Under Check in Long Casling Routa.";
 						}
-						MoveStone("d8", "c8", movableCtx2);
+						ChessEngine.MoveStone("d8", "c8", movableCtx2);
                         isBlackKingUnderCheckInRouta = IsBlackkingUnderThreat(movableCtx2);
                         if (isBlackKingUnderCheckInRouta)
 						{
@@ -1147,7 +706,7 @@ class BoardHelper
 					// short black castling
 					else if (toCell.cellIndex == (0, 6))
 					{
-						MoveStone(blackKing.cellString, "f8", movableCtx2);
+						ChessEngine.MoveStone(blackKing.cellString, "f8", movableCtx2);
                         isBlackKingUnderCheckInRouta = IsBlackkingUnderThreat(movableCtx2);
 
                         if (isBlackKingUnderCheckInRouta)
@@ -1155,7 +714,7 @@ class BoardHelper
 							return "Black King Under Check in Short Casling Routa.";
 						}
 
-						MoveStone("f8", "g8", movableCtx2);
+						ChessEngine.MoveStone("f8", "g8", movableCtx2);
                         isBlackKingUnderCheckInRouta = IsBlackkingUnderThreat(movableCtx2);
 
                         if (isBlackKingUnderCheckInRouta)
@@ -1212,6 +771,7 @@ class Program
 
 	static void Main()
 	{
+		
 		ChessContext ctx = new ChessContext();
 		ctx.board = new char[8, 8]{
 		{ 'r', 'n', 'b', 'q', 'k', 'b', 'n', 'r' }, // 8. sıra (siyah)
@@ -1226,13 +786,13 @@ class Program
 
 		IInputProvider inputProvider = new ConsoleInputProvider();
 
-        BoardHelper.PrintBoard(ref ctx);
-			int i = 0;
+        BoardPrinter.PrintBoard(ref ctx);
+		int i = 0;
 		while (true)
 		{
             BoardHelper.TakeFrom(ctx, inputProvider);
             Console.Clear();
-            BoardHelper.PrintBoard(ref ctx);
+            BoardPrinter.PrintBoard(ref ctx);
 
 
             BoardHelper.TakeTo(ctx, inputProvider);
@@ -1245,13 +805,13 @@ class Program
 
                 if (error == "")
                 {
-                    BoardHelper.MoveStone(ctx.inputFrom, ctx.inputTo, ctx);
+                    ChessEngine.MoveStone(ctx.inputFrom, ctx.inputTo, ctx);
                 }
                 else
                 {
                     Console.WriteLine(error);
                 }
-                BoardHelper.PrintBoard(ref ctx);
+                BoardPrinter.PrintBoard(ref ctx);
 
             }
 
