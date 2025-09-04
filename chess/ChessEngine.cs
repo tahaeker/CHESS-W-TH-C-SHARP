@@ -10,8 +10,8 @@ namespace chess
     {
         public static void MoveStone(string from, string to, ChessContext ctx)
         {
-            Cell fromCell = BoardHelper.StringToCell(from, ctx);
-            Cell toCell = BoardHelper.StringToCell(to, ctx);
+            Cell fromCell = BoardConverter.StringToCell(from, ctx);
+            Cell toCell = BoardConverter.StringToCell(to, ctx);
 
 
 
@@ -59,8 +59,8 @@ namespace chess
 
 
             //last movements
-            ctx.lastFromCell = BoardHelper.CellToCell(fromCell, ctx);//burayı sor aynı heapta tutuyor o yüzden değişir mi diye düşündüm
-            ctx.lastToCell = BoardHelper.CellToCell(toCell, ctx);
+            ctx.lastFromCell = BoardConverter.CellToCell(fromCell, ctx);//burayı sor aynı heapta tutuyor o yüzden değişir mi diye düşündüm
+            ctx.lastToCell = BoardConverter.CellToCell(toCell, ctx);
             ctx.lastToCell.stone = toCell.stone;//yani burası değişiyor mu diye soruyorsun
             ctx.lastFromCell.stone = fromCell.stone;//buranın etkisi var mı diye soruyorum????????????
 
@@ -102,12 +102,12 @@ namespace chess
             }
 
             //how many the kimg moved?
-            if (BoardHelper.IsThereJustKing(ctx).Item1 && ctx.lastFromCell.stone == 'K')
+            if (BoardState.IsThereJustKing(ctx).Item1 && ctx.lastFromCell.stone == 'K')
             {
                 // yanlış ctx.howMuchWhitekingMoved = ctx.howMuchWhitekingMoved++;
                 ctx.howMuchWhitekingMoved++;
             }
-            else if (BoardHelper.IsThereJustKing(ctx).Item2 && ctx.lastFromCell.stone == 'k')
+            else if (BoardState.IsThereJustKing(ctx).Item2 && ctx.lastFromCell.stone == 'k')
             {
                 //yanlış ctx.howMuchWhitekingMoved = ctx.howMuchWhitekingMoved++;
                 ctx.howMuchBlackkingMoved++;
@@ -133,47 +133,5 @@ namespace chess
         }
 
 
-
-        public static void UndoMove(ChessContext ctx)
-        {
-            if (ctx.MoveHistory.Count == 0)
-            {
-                Console.WriteLine("There is not a move can be undo!");
-                return;
-            }
-
-
-            var lastMove = ctx.MoveHistory.Last();
-
-
-            var (fromRow, fromCol) = BoardHelper.StringToIndex(lastMove.From);
-            var (toRow, toCol) = BoardHelper.StringToIndex(lastMove.To);
-
-
-            //return 
-            ctx.board[fromRow, fromCol] = ctx.board[toRow, toCol];
-            ctx.board[toRow, toCol] = lastMove.Captured == '.' ? ctx.empty : lastMove.Captured;
-
-
-
-            // deleting the move from the past
-            ctx.MoveHistory.RemoveAt(ctx.MoveHistory.Count - 1);
-
-            var BeforeLast = ctx.MoveHistory.Last();
-
-            var (beforeFromRow, beforeFromCol) = BoardHelper.StringToIndex(BeforeLast.From);
-            var (beforeToRow, beforeToCol) = BoardHelper.StringToIndex(BeforeLast.To);
-
-            // updating
-            ctx.lastFromCell = new Cell(beforeFromRow, beforeFromCol, ctx);
-            ctx.lastToCell = new Cell(beforeToRow, beforeToCol, ctx);
-
-
-            // Change order back
-            ctx.whiteTurn = !ctx.whiteTurn;
-
-            Console.WriteLine($"Hamle geri alındı: {lastMove}");
-
-        }
     }
 }

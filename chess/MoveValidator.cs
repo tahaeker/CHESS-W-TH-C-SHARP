@@ -204,7 +204,7 @@ namespace chess
 
             if (!ctx.IsFakeMovement)
             {
-                ChessContext tempCtx = BoardHelper.copyBoard(ctx);
+                ChessContext tempCtx = BoardState.copyBoard(ctx);
                 tempCtx.IsFakeMovement = true;
 
                 if (MoveValidator.IsValidCastlingMove(fromCell, toCell, tempCtx))
@@ -223,15 +223,15 @@ namespace chess
         {
 
             ChessContext tempCtx;
-            tempCtx = BoardHelper.copyBoard(ctx);
+            tempCtx = BoardState.copyBoard(ctx);
             tempCtx.IsFakeMovement = true;
 
-            if (ctx.whiteTurn && BoardHelper.IsWhitekingUnderThreat(ctx))
+            if (ctx.whiteTurn && BoardState.IsWhitekingUnderThreat(ctx))
             {
                 return false;
             }
 
-            if (!ctx.whiteTurn && BoardHelper.IsBlackkingUnderThreat(ctx))
+            if (!ctx.whiteTurn && BoardState.IsBlackkingUnderThreat(ctx))
             {
                 return false;
             }

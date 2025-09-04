@@ -12,7 +12,49 @@ namespace chess
 {
     internal class DataStorage
     {
-        
+        public static void UndoMove(ChessContext ctx)
+        {
+            if (ctx.MoveHistory.Count == 0)
+            {
+                //Console.WriteLine("There is not a move can be undo!");
+                return;
+            }
+
+
+            var lastMove = ctx.MoveHistory.Last();
+
+
+            var (fromRow, fromCol) = BoardConverter.StringToIndex(lastMove.From);
+            var (toRow, toCol) = BoardConverter.StringToIndex(lastMove.To);
+
+
+            //return 
+            ctx.board[fromRow, fromCol] = ctx.board[toRow, toCol];
+            ctx.board[toRow, toCol] = lastMove.Captured == '.' ? ctx.empty : lastMove.Captured;
+
+
+
+            // deleting the move from the past
+            ctx.MoveHistory.RemoveAt(ctx.MoveHistory.Count - 1);
+
+            var BeforeLast = ctx.MoveHistory.Last();
+
+            var (beforeFromRow, beforeFromCol) = BoardConverter.StringToIndex(BeforeLast.From);
+            var (beforeToRow, beforeToCol) = BoardConverter.StringToIndex(BeforeLast.To);
+
+            // updating
+            ctx.lastFromCell = new Cell(beforeFromRow, beforeFromCol, ctx);
+            ctx.lastToCell = new Cell(beforeToRow, beforeToCol, ctx);
+
+
+            // Change order back
+            ctx.whiteTurn = !ctx.whiteTurn;
+
+            //Console.WriteLine($"Hamle geri alındı: {lastMove}");
+
+        }
+
+
         public static void SaveMoveHistory(List<Move> moves, string filePath)
         {
             // Serialize the list of moves to JSON and save to file:JsonSerializer.Serialize
@@ -52,6 +94,28 @@ namespace chess
                 return (new Player("defaultWhite", true), new Player("defaultBlack", false));
 
             return (players[0], players[1]);
+        }
+
+
+
+
+        public static void MoveHistoryPrinter(ChessContext ctx)
+        {
+
+            Console.WriteLine("Move History: ");
+            for (int i = 0; i < ctx.MoveHistory.Count; i++)
+            {
+                var move = ctx.MoveHistory[i];
+
+                if (move.IsWhiteTurn)
+                    Console.Write($"{move} ");
+                else
+                    Console.WriteLine(move);
+            }
+            if (ctx.MoveHistory.Count % 2 == 1)
+            {
+                Console.WriteLine();
+            }
         }
 
 

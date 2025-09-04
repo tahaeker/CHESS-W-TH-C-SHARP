@@ -34,8 +34,8 @@ namespace chess
 
                     if (ctx.inputFrom != "")
                     {
-                        string pos = BoardHelper.IndexToString(i, j);
-                        string moveError = BoardHelper.MoveError(ctx.inputFrom, pos, ctx);
+                        string pos = BoardConverter.IndexToString(i, j);
+                        string moveError = ErrorChecker.MoveError(ctx.inputFrom, pos, ctx);
 
                         if (i == ctx.touchedCell.Row && j == ctx.touchedCell.Col)
                         {
