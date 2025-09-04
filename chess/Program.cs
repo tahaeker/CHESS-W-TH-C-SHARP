@@ -81,6 +81,13 @@ class ChessContext
 	public List<chess.Move> MoveHistory { get; set; } = new List<chess.Move>();
 
 
+	public Player WhitePlayer { get; set; }
+	public Player BlackPlayer { get; set; }
+
+
+
+
+
 	
 	
 
@@ -632,7 +639,6 @@ class BoardHelper
 				return "White king is under threat";
 
 
-
 			
 
 			ChessContext movableCtx2 = copyBoard(ctx);
@@ -776,18 +782,33 @@ class Program
 		ctx.board = new char[8, 8]{
 		{ 'r', 'n', 'b', 'q', 'k', 'b', 'n', 'r' }, // 8. sıra (siyah)
 		{ 'p', 'p', 'p', '.', '.', '.', 'p', 'p' },
-		{ '.', '.', '.', '.', '.', '.', '.', '.' },
-		{ '.', '.', '.', '.', 'R', '.', '.', '.' },
+		{ '.', '.', '.', '.', '.', 'q', '.', '.' },
+		{ '.', '.', 'b', '.', '.', '.', '.', '.' },
 		{ '.', '.', '.', '.', '.', '.', '.', '.' },
 		{ '.', '.', '.', '.', '.', '.', '.', '.' },
 		{ 'P', 'P', 'P', '.', '.', '.', 'P', 'P' },
-		{ 'R', '.', '.', '.', 'K', '.', '.', 'R' }  // 1. sıra (beyaz)
+		{ 'R', '.', '.', 'Q', 'K', 'B', 'N', 'R' }  // 1. sıra (beyaz)
 		};
 
 		IInputProvider inputProvider = new ConsoleInputProvider();
 
+
+        ctx.WhitePlayer = new Player("Alice", true);
+        ctx.BlackPlayer = new Player("Bob", false);
+		DataStorage.LoadPlayers("Players.txt");
+
+
+
         BoardPrinter.PrintBoard(ref ctx);
+		
+		
 		int i = 0;
+		
+		
+		//ctx.MoveHistory = DataStorage.LoadMoveHistory("moves.json");//varsa dosyadan gelsin
+
+
+
 		while (true)
 		{
             BoardHelper.TakeFrom(ctx, inputProvider);
@@ -816,13 +837,6 @@ class Program
             }
 
 
-			//Write History Move
-			BoardHelper.MoveHistoryPrinter(ctx);
-			//Console.WriteLine($"Last Move: {ctx.MoveHistory.Last()}");
-
-
-
-
 
 			//if just king is left  
 			if (BoardHelper.IsThereJustKing(ctx).Item1)
@@ -841,22 +855,34 @@ class Program
             if (ctx.whiteWins)
 			{
 				Console.WriteLine(" Whites Won.:)");
-				break;
+                ctx.WhitePlayer.Wins++;
+                ctx.BlackPlayer.Losses--;
+                break;
 			}
 			else if (ctx.blackWins)
 			{
 				Console.WriteLine(" Blacks Won.:)");
-				break;
+                ctx.BlackPlayer.Wins++;
+                ctx.WhitePlayer.Losses--;
+                break;
 			}
 			else if (ctx.drawStuation)
 			{
 				Console.WriteLine(" There is not Winner. Draw :)");
 				break;
 			}
-			
 
-		}
-	}
+
+
+            //Write History Move
+            BoardHelper.MoveHistoryPrinter(ctx);
+            //Console.WriteLine($"Last Move: {ctx.MoveHistory.Last()}");
+            DataStorage.SaveMoveHistory(ctx.MoveHistory, "moves.json");// her hamleden osnra dosyaya kaydet
+
+            DataStorage.SavePlayers(ctx.WhitePlayer, ctx.BlackPlayer, "Players.txt");
+
+        }
+    }
 
 }
 //eksikler
