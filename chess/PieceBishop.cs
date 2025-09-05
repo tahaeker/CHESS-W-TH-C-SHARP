@@ -6,10 +6,8 @@ using System.Threading.Tasks;
 
 namespace chess
 {
-    internal class PieceBishop : Piece
+    internal class PieceBishop
     {
-        
-
 
     }
 }

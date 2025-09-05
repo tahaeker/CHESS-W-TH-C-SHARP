@@ -44,7 +44,7 @@ namespace chess
                 ctx.inputTo = Console.ReadLine();
                 ctx.inputTo = ctx.inputTo.ToLower();
                 int errorNo = IsValidFromToCondition(ctx.inputFrom, ctx.inputTo, ctx);
-                if (errorNo == 11 || errorNo == 5 || errorNo == 6)
+                if (errorNo == 11 || errorNo == 5 || errorNo == 6|| errorNo == 7)
                 {
                     errorMessage = "Invalid To condition!!";
 
@@ -109,6 +109,13 @@ namespace chess
             {
                 //Console.WriteLine("From and To cannot be the same!!");
                 return 6;
+            }
+
+
+            if (!(to[1] - '0' > 0 & to[1] - '0' < 8))
+            {
+                //Console.WriteLine("to has to be between 1-7!!");
+                return 7;
             }
 
 

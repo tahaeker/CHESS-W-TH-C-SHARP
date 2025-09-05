@@ -6,6 +6,17 @@ using System.Threading.Tasks;
 
 namespace chess
 {
+    public class MoveResult
+    {
+        public bool IsSuccess { get; set; }
+        public string ErrorMessage { get; set; }
+        public MoveResult(bool isSuccess, string errorMessage)
+        {
+            IsSuccess = isSuccess;
+            ErrorMessage = errorMessage;
+        }
+    }
+
     internal class ErrorChecker
     {
         public static string MoveError(string from, string to, ChessContext ctx)
@@ -44,6 +55,10 @@ namespace chess
             if (InputHandler.IsValidFromToCondition(from, to, ctx) == 5)
             {
                 return "To must be 2 characters long!!";
+            }
+            if (InputHandler.IsValidFromToCondition(from, to, ctx) == 7)
+            {
+                return "To must be between 1-7!!";
             }
             if (InputHandler.IsValidFromToCondition(from, to, ctx) == 2)
             {

@@ -121,6 +121,27 @@ public class ConsoleInputProvider : IInputProvider//this is taking data input fr
 //}
 
 
+
+public interface IOutputProvider
+{
+	void Write(string message);
+	void WriteLine(string message);
+}
+
+
+
+public class ConsoleOutputProvider : IOutputProvider
+{
+	public void Write(string message)
+	{
+		Console.Write(message);
+    }
+
+	public void WriteLine(string message)
+	{
+		Console.WriteLine(message);
+	}
+}
 class Program
 {
 
@@ -140,6 +161,10 @@ class Program
 		};
 
 		IInputProvider inputProvider = new ConsoleInputProvider();
+		IOutputProvider outputProvider = new ConsoleOutputProvider();
+
+		outputProvider.WriteLine("Welcome to Console Chess!");
+
 
 
         ctx.WhitePlayer = new Player("Alice", true);
@@ -168,33 +193,23 @@ class Program
             InputHandler.TakeTo(ctx, inputProvider);
             Console.Clear();
 
-            string error = ErrorChecker.MoveError(ctx.inputFrom, ctx.inputTo, ctx);
 
-            if (ctx.inputFrom != "" & ctx.inputTo != "")
+            var result = ChessEngine.TryMove(ctx.inputFrom, ctx.inputTo, ctx);
+            if (!result.Success)
             {
-
-                if (error == "")
-                {
-                    ChessEngine.MoveStone(ctx.inputFrom, ctx.inputTo, ctx);
-                }
-                else
-                {
-                    Console.WriteLine(error);
-                }
-                BoardPrinter.PrintBoard(ref ctx);
-
+                outputProvider.WriteLine(result.ErrorMessage);
             }
+			BoardPrinter.PrintBoard(ref ctx);
 
 
-
-			//if just king is left  
-			if (BoardState.IsThereJustKing(ctx).Item1)
+            //if just king is left  
+            if (BoardState.IsThereJustKing(ctx).Item1)
 			{
-				Console.WriteLine($"White King moved {ctx.howMuchWhitekingMoved} times.");
+                outputProvider.WriteLine($"White King moved {ctx.howMuchWhitekingMoved} times.");
 			}
 			if (BoardState.IsThereJustKing(ctx).Item2)
 			{
-				Console.WriteLine($"Black King moved {ctx.howMuchBlackkingMoved} times.");
+                outputProvider.WriteLine($"Black King moved {ctx.howMuchBlackkingMoved} times.");
 
 			}
 

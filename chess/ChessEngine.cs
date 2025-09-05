@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Security.Cryptography.X509Certificates;
 using System.Text;
 using System.Threading.Tasks;
 
@@ -8,6 +9,29 @@ namespace chess
 {
     internal class ChessEngine
     {
+        public class MoveResult
+        {
+            public bool Success { get; set; }
+            public string ErrorMessage { get; set; }
+        }
+
+        public static MoveResult TryMove(string from,string to, ChessContext ctx)
+        {
+            string error = ErrorChecker.MoveError(from, to, ctx);
+
+            if(!string.IsNullOrEmpty(error))
+            {
+                return new MoveResult { Success = false, ErrorMessage = error };
+            }
+
+            MoveStone(from, to, ctx);
+
+            return new MoveResult { Success = true, ErrorMessage = string.Empty };
+
+
+        }
+
+
         public static void MoveStone(string from, string to, ChessContext ctx)
         {
             Cell fromCell = BoardConverter.StringToCell(from, ctx);
