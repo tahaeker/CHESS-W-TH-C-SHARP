@@ -8,9 +8,9 @@ using System.Collections.Generic;
 using System.Text.Json;
 
 
-namespace chess
+namespace ChessEngine.Core
 {
-    internal class DataStorage
+    public class DataStorage
     {
         public static void UndoMove(ChessContext ctx)
         {
@@ -29,8 +29,8 @@ namespace chess
 
 
             //return 
-            ctx.board[fromRow, fromCol] = ctx.board[toRow, toCol];
-            ctx.board[toRow, toCol] = lastMove.Captured == '.' ? ctx.empty : lastMove.Captured;
+            ctx.Board[fromRow, fromCol] = ctx.Board[toRow, toCol];
+            ctx.Board[toRow, toCol] = lastMove.Captured == '.' ? ctx.empty : lastMove.Captured;
 
 
 

@@ -5,6 +5,10 @@ VisualStudioVersion = 17.14.36109.1
 MinimumVisualStudioVersion = 10.0.40219.1
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "chess", "chess\chess.csproj", "{8B03EFC6-59B3-47A4-81BE-F0FB61C876AB}"
 EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "ChessEngine.core", "ChessEngine.core\ChessEngine.core.csproj", "{034D9DF9-1BE1-4F32-972E-FC378FF4B756}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "ChessWebApi", "ChessWebApi\ChessWebApi.csproj", "{15C9A660-E82F-46A5-9776-4FA4676C4C3C}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -15,6 +19,14 @@ Global
 		{8B03EFC6-59B3-47A4-81BE-F0FB61C876AB}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{8B03EFC6-59B3-47A4-81BE-F0FB61C876AB}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{8B03EFC6-59B3-47A4-81BE-F0FB61C876AB}.Release|Any CPU.Build.0 = Release|Any CPU
+		{034D9DF9-1BE1-4F32-972E-FC378FF4B756}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{034D9DF9-1BE1-4F32-972E-FC378FF4B756}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{034D9DF9-1BE1-4F32-972E-FC378FF4B756}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{034D9DF9-1BE1-4F32-972E-FC378FF4B756}.Release|Any CPU.Build.0 = Release|Any CPU
+		{15C9A660-E82F-46A5-9776-4FA4676C4C3C}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{15C9A660-E82F-46A5-9776-4FA4676C4C3C}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{15C9A660-E82F-46A5-9776-4FA4676C4C3C}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{15C9A660-E82F-46A5-9776-4FA4676C4C3C}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE

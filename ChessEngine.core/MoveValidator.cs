@@ -4,13 +4,13 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 
-namespace chess
+namespace ChessEngine.Core
 {
-    internal class MoveValidator
+    public class MoveValidator
     {
         public static bool IsValidPawnMove(Cell fromCell, Cell toCell, ChessContext ctx)
         {
-            if (char.ToLower(fromCell.stone) != 'p')// parametreye dikkat et ilk başta hepsi string tanımlı
+            if (char.ToLower(fromCell.Stone) != 'p')// parametreye dikkat et ilk başta hepsi string tanımlı
             {
                 return false;
             }
@@ -24,15 +24,15 @@ namespace chess
 
             if (fromCell.Col == toCell.Col &&
                 toCell.Row - fromCell.Row == dir &&
-                toCell.isEmpty)
+                toCell.IsEmpty)
             {
                 return true;
             } //start point of the pawm
             else if (
                 fromCell.Col == toCell.Col && toCell.Row - fromCell.Row == 2 * dir &&
                 (fromCell.Row == 1 || fromCell.Row == 6) &&
-                toCell.isEmpty &&
-                ctx.board[fromCell.Row + dir, fromCell.Col] == '.')
+                toCell.IsEmpty &&
+                ctx.Board[fromCell.Row + dir, fromCell.Col] == '.')
             {
                 return true;
             }
@@ -40,14 +40,14 @@ namespace chess
 
             //çapraz yemek için
             if (
-                (!toCell.isEmpty && (toCell.Col - fromCell.Col == dir) && (toCell.Row - fromCell.Row == dir)) ||
-                (!toCell.isEmpty && (toCell.Col - fromCell.Col == -dir) && (toCell.Row - fromCell.Row == dir))
+                (!toCell.IsEmpty && (toCell.Col - fromCell.Col == dir) && (toCell.Row - fromCell.Row == dir)) ||
+                (!toCell.IsEmpty && (toCell.Col - fromCell.Col == -dir) && (toCell.Row - fromCell.Row == dir))
                 )
             {
                 return true;
             }
             // passant move
-            if (char.ToLower(ctx.lastFromCell.stone) == 'p' && ctx.lastToCell.Col == toCell.Col &&
+            if (char.ToLower(ctx.lastFromCell.Stone) == 'p' && ctx.lastToCell.Col == toCell.Col &&
                 (
                 (ctx.lastFromCell.Row == 6 && fromCell.Row == 4 && (toCell.Row - fromCell.Row == dir) && (toCell.Col - fromCell.Col == -dir)) ||
                 (ctx.lastFromCell.Row == 6 && fromCell.Row == 4 && (toCell.Row - fromCell.Row == dir) && (toCell.Col - fromCell.Col == dir)) ||
@@ -64,8 +64,8 @@ namespace chess
 
         public static bool IsValidRookMove(Cell fromCell, Cell toCell, ChessContext ctx)
         {
-            if (char.ToLower(fromCell.stone) != 'r' &&
-                char.ToLower(fromCell.stone) != 'q')// parametreye dikkat et ilk başta hepsi string tanımlı
+            if (char.ToLower(fromCell.Stone) != 'r' &&
+                char.ToLower(fromCell.Stone) != 'q')// parametreye dikkat et ilk başta hepsi string tanımlı
             {
                 return false;
             }
@@ -79,7 +79,7 @@ namespace chess
 
                 for (int j = (fromCell.Col + yDirectionStep); j != toCell.Col; j += yDirectionStep)
                 {
-                    if (ctx.board[fromCell.Row, j] != '.')
+                    if (ctx.Board[fromCell.Row, j] != '.')
 
                         return false;
                 }
@@ -93,7 +93,7 @@ namespace chess
 
                 for (int i = fromCell.Row + xDirectionStep; i != toCell.Row; i += xDirectionStep)
                 {
-                    if (ctx.board[i, fromCell.Col] != '.') return false;
+                    if (ctx.Board[i, fromCell.Col] != '.') return false;
                 }
             }
             else
@@ -138,8 +138,8 @@ namespace chess
 
         public static bool IsValidBishopMove(Cell fromCell, Cell toCell, ChessContext ctx)
         {
-            if (char.ToLower(fromCell.stone) != 'b' &&
-                char.ToLower(fromCell.stone) != 'q')// parametreye dikkat et ilk başta hepsi string tanımlı
+            if (char.ToLower(fromCell.Stone) != 'b' &&
+                char.ToLower(fromCell.Stone) != 'q')// parametreye dikkat et ilk başta hepsi string tanımlı
             {
                 return false;
             }
@@ -162,7 +162,7 @@ namespace chess
             {
                 int checkI = fromCell.Row + dirI * k;
                 int checkJ = fromCell.Col + dirJ * k;
-                if (ctx.board[checkI, checkJ] != '.')
+                if (ctx.Board[checkI, checkJ] != '.')
                 {
                     return false;
                 }
@@ -236,15 +236,15 @@ namespace chess
                 return false;
             }
 
-            if (fromCell.cellIndex == (7, 4) && toCell.cellIndex == (7, 2) &&
-            ctx.board[7, 2] == ctx.empty && ctx.board[7, 3] == ctx.empty &&
-            !ctx.whiteQueensideRookMoved && ctx.board[7, 0] != ctx.empty && !ctx.whiteKingMoved)
+            if (fromCell.CellIndex == (7, 4) && toCell.CellIndex == (7, 2) &&
+            ctx.Board[7, 2] == ctx.empty && ctx.Board[7, 3] == ctx.empty &&
+            !ctx.whiteQueensideRookMoved && ctx.Board[7, 0] != ctx.empty && !ctx.whiteKingMoved)
             {
                 return true;
             }
-            else if (fromCell.cellIndex == (7, 4) && toCell.cellIndex == (7, 6) &&
-                ctx.board[7, 5] == ctx.empty && ctx.board[7, 6] == ctx.empty &&
-                !ctx.whiteKingsideRookMoved && ctx.board[7, 7] != ctx.empty && !ctx.whiteKingMoved)
+            else if (fromCell.CellIndex == (7, 4) && toCell.CellIndex == (7, 6) &&
+                ctx.Board[7, 5] == ctx.empty && ctx.Board[7, 6] == ctx.empty &&
+                !ctx.whiteKingsideRookMoved && ctx.Board[7, 7] != ctx.empty && !ctx.whiteKingMoved)
             {
                 return true;
             }
@@ -252,15 +252,15 @@ namespace chess
 
 
             //black king castling
-            if (fromCell.cellIndex == (0, 4) && toCell.cellIndex == (0, 2) &&
-            ctx.board[0, 2] == ctx.empty && ctx.board[0, 3] == ctx.empty &&
-            !ctx.blackQueensideRookMoved && ctx.board[0, 0] != ctx.empty && !ctx.blackKingMoved)
+            if (fromCell.CellIndex == (0, 4) && toCell.CellIndex == (0, 2) &&
+            ctx.Board[0, 2] == ctx.empty && ctx.Board[0, 3] == ctx.empty &&
+            !ctx.blackQueensideRookMoved && ctx.Board[0, 0] != ctx.empty && !ctx.blackKingMoved)
             {
                 return true;
             }
-            else if (fromCell.cellIndex == (0, 4) && toCell.cellIndex == (0, 6) &&
-                ctx.board[0, 5] == ctx.empty && ctx.board[0, 6] == ctx.empty &&
-                !ctx.blackKingsideRookMoved && ctx.board[0, 7] != ctx.empty && !ctx.blackKingMoved)
+            else if (fromCell.CellIndex == (0, 4) && toCell.CellIndex == (0, 6) &&
+                ctx.Board[0, 5] == ctx.empty && ctx.Board[0, 6] == ctx.empty &&
+                !ctx.blackKingsideRookMoved && ctx.Board[0, 7] != ctx.empty && !ctx.blackKingMoved)
             {
                 return true;
             }

@@ -4,7 +4,7 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 
-namespace chess
+namespace ChessEngine.Core
 {
     public class MoveResult
     {
@@ -17,7 +17,7 @@ namespace chess
         }
     }
 
-    internal class ErrorChecker
+    public class ErrorChecker
     {
         public static string MoveError(string from, string to, ChessContext ctx)
         {
@@ -30,11 +30,11 @@ namespace chess
             Cell toCell = BoardConverter.StringToCell(to, ctx);
 
             //for flag
-            if (toCell.cellIndex == (2, 4) && toCell.stone == 'K' && fromCell.cellIndex == (1, 3))
+            if (toCell.CellIndex == (2, 4) && toCell.Stone == 'K' && fromCell.CellIndex == (1, 3))
             {
 
             }
-            if (fromCell.stone == '.')
+            if (fromCell.Stone == '.')
             {
                 return "From Cell cannot be empty!!";
             }
@@ -79,18 +79,18 @@ namespace chess
             }
 
 
-            if (fromCell.IsWhite & (toCell.IsWhite) & !toCell.isEmpty)
+            if (fromCell.IsWhite & (toCell.IsWhite) & !toCell.IsEmpty)
 
             {
 
                 return "Cannot Whites Move Owm Stone";
             }
-            if (fromCell.IsBlack & (toCell.IsBlack & !toCell.isEmpty))
+            if (fromCell.IsBlack & (toCell.IsBlack & !toCell.IsEmpty))
             {
                 return "Cannot Blacks Move Owm Stone";
             }
 
-            switch (char.ToLower(fromCell.stone))
+            switch (char.ToLower(fromCell.Stone))
             {
                 case 'p':
                     if (!MoveValidator.IsValidPawnMove(fromCell, toCell, ctx))
@@ -125,7 +125,7 @@ namespace chess
                 ChessContext nextCtx = BoardState.copyBoard(ctx);
                 nextCtx.IsFakeMovement = true; // to prevent stack overflow exception
 
-                ChessEngine.MoveStone(fromCell.cellString, toCell.cellString, nextCtx);
+                ChessEngine.MoveStone(fromCell.CellString, toCell.CellString, nextCtx);
 
                 if (nextCtx.whiteTurn && BoardState.IsBlackkingUnderThreat(nextCtx))
                     return "Black king is under threat";
@@ -147,9 +147,9 @@ namespace chess
                     if (!BoardState.IsWhitekingUnderThreat(ctx))
                     {
                         //long white casling
-                        if (toCell.cellIndex == (7, 2))
+                        if (toCell.CellIndex == (7, 2))
                         {
-                            ChessEngine.MoveStone(whiteKing.cellString, "d1", movableCtx2);
+                            ChessEngine.MoveStone(whiteKing.CellString, "d1", movableCtx2);
                             isWhiteKingUnderCheckInRouta = BoardState.IsWhitekingUnderThreat(movableCtx2);
                             if (isWhiteKingUnderCheckInRouta)
                             {
@@ -166,10 +166,10 @@ namespace chess
 
                         }
                         //short white caslting
-                        else if (toCell.cellIndex == (7, 6))
+                        else if (toCell.CellIndex == (7, 6))
                         {
 
-                            ChessEngine.MoveStone(whiteKing.cellString, "f1", movableCtx2);
+                            ChessEngine.MoveStone(whiteKing.CellString, "f1", movableCtx2);
                             isWhiteKingUnderCheckInRouta = BoardState.IsWhitekingUnderThreat(movableCtx2);
                             if (isWhiteKingUnderCheckInRouta)
                             {
@@ -188,9 +188,9 @@ namespace chess
                     if (!BoardState.IsBlackkingUnderThreat(ctx))
                     {
                         //long black castling
-                        if (toCell.cellIndex == (0, 2))
+                        if (toCell.CellIndex == (0, 2))
                         {
-                            ChessEngine.MoveStone(blackKing.cellString, "d8", movableCtx2);
+                            ChessEngine.MoveStone(blackKing.CellString, "d8", movableCtx2);
                             isBlackKingUnderCheckInRouta = BoardState.IsBlackkingUnderThreat(movableCtx2);
                             if (isBlackKingUnderCheckInRouta)
                             {
@@ -205,9 +205,9 @@ namespace chess
 
                         }
                         // short black castling
-                        else if (toCell.cellIndex == (0, 6))
+                        else if (toCell.CellIndex == (0, 6))
                         {
-                            ChessEngine.MoveStone(blackKing.cellString, "f8", movableCtx2);
+                            ChessEngine.MoveStone(blackKing.CellString, "f8", movableCtx2);
                             isBlackKingUnderCheckInRouta = BoardState.IsBlackkingUnderThreat(movableCtx2);
 
                             if (isBlackKingUnderCheckInRouta)

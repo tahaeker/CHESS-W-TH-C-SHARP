@@ -4,9 +4,9 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 
-namespace chess
+namespace ChessEngine.Core
 {
-    internal class BoardState
+    public class BoardState
     {
 
         public static (Cell, Cell) kingLocations(ChessContext ctx)
@@ -18,14 +18,14 @@ namespace chess
             {
                 for (int j = 0; j < 8; j++)
                 {
-                    if (ctx.board[i, j] == 'K')
+                    if (ctx.Board[i, j] == 'K')
                     {
 
                         whiteKingL = new Cell(i, j, ctx);
 
                     }
 
-                    if (ctx.board[i, j] == 'k')
+                    if (ctx.Board[i, j] == 'k')
                     {
 
                         blackKingL = new Cell(i, j, ctx);
@@ -46,8 +46,9 @@ namespace chess
             // Tahta kopyalama
             for (int i = 0; i < 8; i++)
                 for (int j = 0; j < 8; j++)
-                    newCtx.board[i, j] = ctx.board[i, j];
+                    newCtx.Board[i, j] = ctx.Board[i, j];
 
+            
             newCtx.inputFrom = ctx.inputFrom;
             newCtx.inputTo = ctx.inputTo;
             newCtx.empty = ctx.empty;
@@ -85,7 +86,7 @@ namespace chess
                     ChessContext tempCtx = copyBoard(ctx);
                     Cell fromCellOfThreatCell = BoardConverter.StringToCell(fromCellOfThreat, tempCtx);
 
-                    if (fromCellOfThreatCell.stone == 'q' && whiteKing.cellString == "d1")
+                    if (fromCellOfThreatCell.Stone == 'q' && whiteKing.CellString == "d1")
                     {
 
                     }
@@ -93,7 +94,7 @@ namespace chess
                     // kendi taşın kendini tehtid edemeyeceği için renk değiştirdik
                     tempCtx.whiteTurn = false;
 
-                    if (!fromCellOfThreatCell.IsWhite && ErrorChecker.MoveError(fromCellOfThreat, whiteKing.cellString, tempCtx) == "")
+                    if (!fromCellOfThreatCell.IsWhite && ErrorChecker.MoveError(fromCellOfThreat, whiteKing.CellString, tempCtx) == "")
 
                         return true;
 
@@ -124,7 +125,7 @@ namespace chess
 
                     // kendi taşın kendini tehtid edemeyeceği için renk değiştirdik
                     tempCtx.whiteTurn = true;
-                    if (fromCellOfThreatCell.IsWhite && ErrorChecker.MoveError(fromCellOfThreat, blackKing.cellString, tempCtx) == "")
+                    if (fromCellOfThreatCell.IsWhite && ErrorChecker.MoveError(fromCellOfThreat, blackKing.CellString, tempCtx) == "")
                         return true;
 
                 }
@@ -141,7 +142,7 @@ namespace chess
             {
                 for (int j = 0; j < 8; j++)
                 {
-                    char ch = ctx.board[i, j];
+                    char ch = ctx.Board[i, j];
                     if (ch == 'K')
                         whiteKing = true;
                     if (ch == 'k')
@@ -170,7 +171,7 @@ namespace chess
             {
                 for (int j = 0; j < 8; j++)
                 {
-                    char fromch = ctx.board[i, j];
+                    char fromch = ctx.Board[i, j];
 
                     if (fromch == '.') continue;
 

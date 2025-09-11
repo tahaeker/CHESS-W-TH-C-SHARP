@@ -1,102 +1,13 @@
-﻿using chess;
-using System;
+﻿using System;
 using System.ComponentModel.Design;
 using System.Diagnostics;
 using System.Linq.Expressions;
 using System.Runtime.CompilerServices;
 using System.Security.Cryptography;
-
-
-struct Cell
-{
-	public int Row { get; }
-	public int Col { get; }
-    public char stone { get; set; }
-
-	public (int, int) cellIndex => (Row,Col);
-	public string cellString => BoardConverter.IndexToString(Row, Col);
-
-	public bool isEmpty => stone == '.';
-
-    private static readonly char[] WhitePieces = { 'P', 'R', 'N', 'B', 'Q', 'K' };
-    private static readonly char[] BlackPieces = { 'p', 'r', 'n', 'b', 'q', 'k' };
-
-    public bool IsWhite => WhitePieces.Contains(stone);
-    public bool IsBlack => BlackPieces.Contains(stone);
-
-
-    public Cell(int i, int j, ChessContext ctx)
-	{
-
-		Row = i;
-		Col = j;
-		if (ctx != null && i > -1 && j > -1)
-		{//chess context is not null
-			stone = ctx.board[i, j];
-		}
-		else
-		{
-			stone = '.';// default empty stone
-
-        }
-		
-	}
-}
-class ChessContext
-{
-	public char[,] board = new char[8, 8];
-	public  string inputFrom= "";
-	public  string inputTo= "";
-	public char empty = '.'; 
-	public bool whiteTurn = true;
-
-
-	public Cell touchedCell = new Cell(0, 0, null);
-	public Cell lastFromCell = new Cell(0, 0, null);
-	public Cell lastToCell = new Cell(0, 0, null);
-
-
-	public bool whiteKingMoved = false;
-	public bool blackKingMoved = false;
-	public bool whiteQueensideRookMoved = false;
-	public bool whiteKingsideRookMoved = false;
-	public bool blackQueensideRookMoved = false;
-	public bool blackKingsideRookMoved = false;
-
-
-	public bool IsFakeMovement = false; // for testing sub purposes without stack overflow exception
-	
-	public bool whiteWins = false;
-	public bool blackWins = false;
-	public bool drawStuation = false;
-	public bool isGameEnd = false;
+using ChessEngine.Core;
 
 
 
-	public int howMuchWhitekingMoved = 0;
-	public int howMuchBlackkingMoved = 0;
-
-
-
-	public List<chess.Move> MoveHistory { get; set; } = new List<chess.Move>();
-
-
-	public Player WhitePlayer { get; set; }
-	public Player BlackPlayer { get; set; }
-
-
-
-
-
-	
-	
-
-}
-
-public interface IInputProvider
-{
-    string ReadLine();
-}
 
 public class ConsoleInputProvider : IInputProvider//this is taking data input from console
 {
@@ -122,13 +33,6 @@ public class ConsoleInputProvider : IInputProvider//this is taking data input fr
 
 
 
-public interface IOutputProvider
-{
-	void Write(string message);
-	void WriteLine(string message);
-}
-
-
 
 public class ConsoleOutputProvider : IOutputProvider
 {
@@ -149,7 +53,7 @@ class Program
 	{
 		
 		ChessContext ctx = new ChessContext();
-		ctx.board = new char[8, 8]{
+		ctx.Board = new char[8, 8]{
 		{ 'r', 'n', 'b', 'q', 'k', 'b', 'n', 'r' }, // 8. sıra (siyah)
 		{ 'p', 'p', 'p', '.', '.', '.', 'p', 'p' },
 		{ '.', '.', '.', '.', '.', 'q', '.', '.' },
@@ -194,7 +98,7 @@ class Program
             Console.Clear();
 
 
-            var result = ChessEngine.TryMove(ctx.inputFrom, ctx.inputTo, ctx);
+            var result = ChessEngine.Core.ChessEngine.TryMove(ctx.inputFrom, ctx.inputTo, ctx);
             if (!result.Success)
             {
                 outputProvider.WriteLine(result.ErrorMessage);

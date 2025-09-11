@@ -4,9 +4,9 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 
-namespace chess
+namespace chChessEngine.coreess
 {
-    internal class FileName
+    public class FileName
     {
     }
 }

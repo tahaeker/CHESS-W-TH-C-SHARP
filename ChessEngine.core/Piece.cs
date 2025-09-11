@@ -4,9 +4,9 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 
-namespace chess
+namespace ChessEngine.Core
 {
-    internal abstract class Piece
+    public abstract class Piece
     {
         public bool IsWhite { get; }
         public Piece(bool isWhite)

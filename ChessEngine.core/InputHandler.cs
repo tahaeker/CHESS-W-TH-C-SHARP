@@ -4,9 +4,11 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 
-namespace chess
+
+
+namespace ChessEngine.Core
 {
-    internal class InputHandler
+    public class InputHandler
     {
         public static void TakeFrom(ChessContext ctx, IInputProvider inputProvider)
         {

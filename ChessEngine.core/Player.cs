@@ -4,9 +4,9 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 
-namespace chess
+namespace ChessEngine.Core
 {
-    internal class Player
+    public class Player
     {
         public string Name { get; set; }
 
