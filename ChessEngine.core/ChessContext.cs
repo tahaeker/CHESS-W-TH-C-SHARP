@@ -2,6 +2,7 @@
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
+using System.Text.RegularExpressions;
 using System.Threading.Tasks;
 
 namespace ChessEngine.Core
@@ -44,7 +45,7 @@ namespace ChessEngine.Core
 
 
         public List<Move> MoveHistory { get; set; } = new List<Move>();
-
+        public List<char[,]> BoardHistory { get; set; } = new List<char[,]>();
 
         public Player WhitePlayer { get; set; }
         public Player BlackPlayer { get; set; }
@@ -56,6 +57,14 @@ namespace ChessEngine.Core
             Board = new char[8, 8]; // 8x8 satranç tahtası
         }
 
+        // Her hamle sonrası çağrılacak yardımcı metot:
+        public void SaveBoardToHistory()
+        {
+            // Board'un derin kopyasını oluştur
+            var boardCopy = new char[8, 8];
+            Array.Copy(Board, boardCopy, Board.Length);
+            BoardHistory.Add(boardCopy);
+        }
 
     }
 }

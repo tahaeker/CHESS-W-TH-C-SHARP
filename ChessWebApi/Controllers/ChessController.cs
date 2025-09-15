@@ -15,6 +15,17 @@ namespace ChessWebApi.Controllers
             _chessService = chessService;
         }
 
+        [HttpPost("newgame")]
+        public IActionResult NewGame([FromQuery] string WhiteName, [FromQuery] string BlackName)
+        {
+            _chessService.StartNewGame();
+            _chessService.takePlayerName(WhiteName, BlackName); 
+            return Ok(new { message = "New game Started!" });
+        }
+
+
+
+
         [HttpGet("board")]
         public IActionResult GetBoard()
         {

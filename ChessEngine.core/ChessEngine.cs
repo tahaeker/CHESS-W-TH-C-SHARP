@@ -150,6 +150,14 @@ namespace ChessEngine.Core
             };
             ctx.MoveHistory.Add(move);
 
+            ctx.SaveBoardToHistory();
+
+         
+
+            
+
+
+
 
 
             //Turn change

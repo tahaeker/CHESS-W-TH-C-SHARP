@@ -1,4 +1,6 @@
 ﻿using ChessEngine.Core;
+using Microsoft.AspNetCore.Mvc.TagHelpers.Cache;
+using System;
 
 
 namespace ChessWebApi.Services
@@ -6,24 +8,58 @@ namespace ChessWebApi.Services
     public class ChessService
     {
         private readonly ChessContext _context;
-
         public ChessService()
         {
             _context = new ChessContext();
-            _context.Board = new char[8, 8]{
-                { 'r','n','b','q','k','b','n','r' },
-                { 'p','p','p','.','.','.','p','p' },
-                { '.','.','.','.','.','q','.','.' },
-                { '.','.','b','.','.','.','.','.' },
-                { '.','.','.','.','.','.','.','.' },
-                { '.','.','.','.','.','.','.','.' },
-                { 'P','P','P','.','.','.','P','P' },
-                { 'R','.','.','Q','K','B','N','R' }
-            };
 
+            if (_context.BoardHistory == null || _context.BoardHistory.Count==0)
+            {
+                _context.Board = new char[8, 8]{
+                { 'r','n','b','q','k','b','n','r' },
+                { 'p','p','p','p','p','p','p','p' },
+                { '.','.','.','.','.','.','.','.' },
+                { '.','.','.','.','.','.','.','.' },
+                { '.','.','.','.','.','.','.','.' },
+                { '.','.','.','.','.','.','.','.' },
+                { 'P','P','P','P','P','P','P','P' },
+                { 'R','N','B','Q','K','B','N','R' }
+                };
+            }
+            else
+            {
+                _context.Board = _context.BoardHistory.Last();
+            }
+
+        }
+        public void StartNewGame()
+        {
+            
+            _context.Board= new char[8, 8]
+                {
+                { 'r','n','b','q','k','b','n','r' },
+                { 'p','p','p','p','p','p','p','p' },
+                { '.','.','.','.','.','.','.','.' },
+                { '.','.','.','.','.','.','.','.' },
+                { '.','.','.','.','.','.','.','.' },
+                { '.','.','.','.','.','.','.','.' },
+                { 'P','P','P','P','P','P','P','P' },
+                { 'R','N','B','Q','K','B','N','R' }
+            };
             _context.WhitePlayer = new Player("Alice", true);
             _context.BlackPlayer = new Player("Bob", false);
+            _context.MoveHistory.Clear();
+            _context.whiteTurn = true;
         }
+
+        public void takePlayerName(string nameWhite,string nameBlack)
+        {
+            _context.WhitePlayer = new Player(nameWhite, true);
+            _context.BlackPlayer = new Player(nameBlack, false);
+        }
+
+
+
+
 
         public bool TryMove(string from, string to, out string message)
         {
@@ -41,6 +77,7 @@ namespace ChessWebApi.Services
 
         public IEnumerable<string> GetBoard()
         {
+            
             var rows = new List<string>();
             for (int i = 0; i < 8; i++)
             {
@@ -58,5 +95,6 @@ namespace ChessWebApi.Services
         {
             return _context.MoveHistory;
         }
+
     }
 }
