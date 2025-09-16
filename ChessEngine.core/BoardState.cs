@@ -78,18 +78,11 @@ namespace ChessEngine.Core
             {
                 for (int checkJ = 0; checkJ < 8; checkJ++)
                 {
-                    if (checkI == 1 & checkJ == 3)
-                    {
-
-                    }
+                    
                     string fromCellOfThreat = BoardConverter.IndexToString(checkI, checkJ);
                     ChessContext tempCtx = copyBoard(ctx);
                     Cell fromCellOfThreatCell = BoardConverter.StringToCell(fromCellOfThreat, tempCtx);
 
-                    if (fromCellOfThreatCell.Stone == 'q' && whiteKing.CellString == "d1")
-                    {
-
-                    }
 
                     // kendi taşın kendini tehtid edemeyeceği için renk değiştirdik
                     tempCtx.whiteTurn = false;

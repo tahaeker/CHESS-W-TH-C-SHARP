@@ -53,18 +53,25 @@ class Program
 	{
 		
 		ChessContext ctx = new ChessContext();
-		ctx.Board = new char[8, 8]{
-		{ 'r', 'n', 'b', 'q', 'k', 'b', 'n', 'r' }, // 8. sıra (siyah)
-		{ 'p', 'p', 'p', '.', '.', '.', 'p', 'p' },
-		{ '.', '.', '.', '.', '.', 'q', '.', '.' },
-		{ '.', '.', 'b', '.', '.', '.', '.', '.' },
-		{ '.', '.', '.', '.', '.', '.', '.', '.' },
-		{ '.', '.', '.', '.', '.', '.', '.', '.' },
-		{ 'P', 'P', 'P', '.', '.', '.', 'P', 'P' },
-		{ 'R', '.', '.', 'Q', 'K', 'B', 'N', 'R' }  // 1. sıra (beyaz)
-		};
+        if (ctx.BoardHistory == null || ctx.BoardHistory.Count==0)
+        {
+            ctx.Board = new char[8, 8]{
+                { 'r','n','b','q','k','b','n','r' },
+                { 'p','p','p','p','p','p','p','p' },
+                { '.','.','.','.','.','.','.','.' },
+                { '.','.','.','.','.','.','.','.' },
+                { '.','.','.','.','.','.','.','.' },
+                { '.','.','.','.','.','.','.','.' },
+                { 'P','P','P','P','P','P','P','P' },
+                { 'R','N','B','Q','K','B','N','R' }
+                };
+        }
+        else
+        {
+            ctx.Board = ctx.BoardHistory.Last();
+        }
 
-		IInputProvider inputProvider = new ConsoleInputProvider();
+        IInputProvider inputProvider = new ConsoleInputProvider();
 		IOutputProvider outputProvider = new ConsoleOutputProvider();
 
 		outputProvider.WriteLine("Welcome to Console Chess!");

@@ -29,11 +29,12 @@ namespace ChessEngine.Core
             Cell fromCell = BoardConverter.StringToCell(from, ctx);
             Cell toCell = BoardConverter.StringToCell(to, ctx);
 
-            //for flag
-            if (toCell.CellIndex == (2, 4) && toCell.Stone == 'K' && fromCell.CellIndex == (1, 3))
+            if(fromCell.CellIndex==toCell.CellIndex)
             {
-
+                return "From and To cannot be the same!!";
+            
             }
+
             if (fromCell.Stone == '.')
             {
                 return "From Cell cannot be empty!!";
@@ -42,15 +43,20 @@ namespace ChessEngine.Core
             {
                 return "From or To cannot be empty!!";
             }
-            if (InputHandler.IsValidFromToCondition(from, to, ctx) == 11)
-            {
-                return "To cannot be empty!!";
-            }
-
-
             if (InputHandler.IsValidFromToCondition(from, to, ctx) == 4)
             {
                 return "From must be 2 characters long!!";
+            }
+
+            //if (!fromCell.IsTouchedCellMovable)
+            //{
+            //    return "from must be movable move";
+            //}
+
+
+            if (InputHandler.IsValidFromToCondition(from, to, ctx) == 11)
+            {
+                return "To cannot be empty!!";
             }
             if (InputHandler.IsValidFromToCondition(from, to, ctx) == 5)
             {
@@ -122,6 +128,7 @@ namespace ChessEngine.Core
             // check if the move puts the king in check
             if (!ctx.IsFakeMovement)
             {
+
                 ChessContext nextCtx = BoardState.copyBoard(ctx);
                 nextCtx.IsFakeMovement = true; // to prevent stack overflow exception
 

@@ -25,11 +25,7 @@ namespace ChessEngine.Core
                 Console.Write(8 - i + " | ");
 
                 for (int j = 0; j < 8; j++)
-                {
-                    if (ctx.Board[i, j] == ctx.Board[0, 1])
-                    {
-
-                    }
+                { 
                     char stone = ctx.Board[i, j];
 
                     if (ctx.inputFrom != "")

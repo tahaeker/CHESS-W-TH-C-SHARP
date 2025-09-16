@@ -272,5 +272,43 @@ namespace ChessEngine.Core
             return false;
         }
 
+
+
+
+        public void TouchedCellMovable(Cell fromCell, ChessContext ctx)
+        {
+            /// Can move Touched from Cell  
+            ChessContext tempCtx = BoardState.copyBoard(ctx);
+             
+            bool state = false;
+            for (int rowT = 0; rowT<8; rowT++)
+            {
+                for (int colT = 0; colT<8; colT++)
+                {
+
+                    string to = BoardConverter.IndexToString(rowT, colT);
+                    bool stoneColorW = fromCell.IsWhite ? true : false;
+                    string error = ErrorChecker.MoveError(fromCell.CellString, to, tempCtx);
+                    if (stoneColorW)
+                    {
+                        tempCtx.whiteTurn =true;
+                        state = error == "" ? true : false;
+                        if (state)
+                            fromCell.IsTouchedCellMovable =true;
+
+                    }
+                    else if (!stoneColorW)
+                    {
+                        tempCtx.whiteTurn =false;
+                        state = error == "" ? true : false;
+                        if (state)
+                            fromCell.IsTouchedCellMovable = true;
+                    }
+                    tempCtx.IsFakeMovement = false;
+
+                }
+
+            }
+        }
     }
 }

@@ -47,5 +47,13 @@ namespace ChessEngine.Core
 
         }
 
+        public static Cell IndexToCell(int row, int col, ChessContext ctx)
+        {
+            string pos = IndexToString(row, col);
+            Cell posCell = StringToCell(pos, ctx);
+            return posCell;
+        }
+
+
     }
 }
