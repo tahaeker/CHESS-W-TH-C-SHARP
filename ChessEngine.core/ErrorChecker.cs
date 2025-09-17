@@ -26,10 +26,28 @@ namespace ChessEngine.Core
                 return "";
             }
 
+            //Inputfrom
+            if (!InputHandler.IsValidFromToCondition(from,to,ctx).Item1)
+            {
+                string error = ctx.InputFromError;
+                return error;
+
+            }
+            //Inputto
+            if(!InputHandler.IsValidFromToCondition(from, to, ctx).Item2)
+            {
+                string error= ctx.InputToError;
+                return error;
+
+            }
+
+            
+            
             Cell fromCell = BoardConverter.StringToCell(from, ctx);
             Cell toCell = BoardConverter.StringToCell(to, ctx);
 
-            if(fromCell.CellIndex==toCell.CellIndex)
+
+            if (fromCell.CellIndex==toCell.CellIndex)
             {
                 return "From and To cannot be the same!!";
             
@@ -39,41 +57,7 @@ namespace ChessEngine.Core
             {
                 return "From Cell cannot be empty!!";
             }
-            if (InputHandler.IsValidFromToCondition(from, to, ctx) == 1)
-            {
-                return "From or To cannot be empty!!";
-            }
-            if (InputHandler.IsValidFromToCondition(from, to, ctx) == 4)
-            {
-                return "From must be 2 characters long!!";
-            }
 
-            //if (!fromCell.IsTouchedCellMovable)
-            //{
-            //    return "from must be movable move";
-            //}
-
-
-            if (InputHandler.IsValidFromToCondition(from, to, ctx) == 11)
-            {
-                return "To cannot be empty!!";
-            }
-            if (InputHandler.IsValidFromToCondition(from, to, ctx) == 5)
-            {
-                return "To must be 2 characters long!!";
-            }
-            if (InputHandler.IsValidFromToCondition(from, to, ctx) == 7)
-            {
-                return "To must be between 1-7!!";
-            }
-            if (InputHandler.IsValidFromToCondition(from, to, ctx) == 2)
-            {
-                return "From or To must be a valid letter!!";
-            }
-            if (InputHandler.IsValidFromToCondition(from, to, ctx) == 3)
-            {
-                return "Y Axis of From must be a valid between 1-7";
-            }
 
             if (ctx.whiteTurn & !fromCell.IsWhite)
             {
@@ -83,6 +67,16 @@ namespace ChessEngine.Core
             {
                 return "Row of black Stones";
             }
+
+            if (!ctx.IsMoveTouchedMovableControl)
+            {
+                if (!MoveValidator.IsTouchedCellMovable(from, ctx) )
+                {
+                    return "from must be movable move";
+                }
+
+            }
+
 
 
             if (fromCell.IsWhite & (toCell.IsWhite) & !toCell.IsEmpty)

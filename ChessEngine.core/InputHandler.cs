@@ -4,8 +4,6 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 
-
-
 namespace ChessEngine.Core
 {
     public class InputHandler
@@ -16,116 +14,136 @@ namespace ChessEngine.Core
             do
             {
                 Console.WriteLine("Hangi taşı oynatmak istiyorsunuz? ");
-                ctx.inputFrom = Console.ReadLine();
+                ctx.inputFrom = inputProvider.ReadLine();
                 ctx.inputFrom = ctx.inputFrom.ToLower();
-                int errorNo = IsValidFromToCondition(ctx.inputFrom, ctx.inputTo, ctx);
-                if (errorNo == 1 || errorNo == 4 || errorNo == 2 || errorNo == 3)
+                IsValidFromToCondition(ctx.inputFrom, ctx.inputTo, ctx);
+                errorMessage = ctx.InputFromError;
+                
+                bool IstouchedMovable = MoveValidator.IsTouchedCellMovable(ctx.inputFrom, ctx);
+               
+                
+                var (isFromValid, _) = IsValidFromToCondition(ctx.inputFrom, null, ctx);
+                if (!isFromValid )
                 {
-                    errorMessage = "Invalid From condition!!";
-
+                    errorMessage = ctx.InputFromError;
+                    Console.WriteLine(errorMessage);
+                }
+                else if (!IstouchedMovable)
+                {
+                    errorMessage = "The selected piece cannot be moved! Please select another piece.";
                     Console.WriteLine(errorMessage);
                 }
                 else
                 {
                     errorMessage = "";
                     ctx.touchedCell = BoardConverter.StringToCell(ctx.inputFrom, ctx);
-
                 }
                 Console.WriteLine();
             } while (errorMessage != "");
         }
 
-
-
         public static void TakeTo(ChessContext ctx, IInputProvider inputProvider)
         {
-            string errorMessage = "";
+            string errorMessage;
+            
             do
             {
                 Console.WriteLine("Nereye taşımak istiyorsunuz? ");
-                ctx.inputTo = Console.ReadLine();
+                ctx.inputTo = inputProvider.ReadLine();
                 ctx.inputTo = ctx.inputTo.ToLower();
-                int errorNo = IsValidFromToCondition(ctx.inputFrom, ctx.inputTo, ctx);
-                if (errorNo == 11 || errorNo == 5 || errorNo == 6|| errorNo == 7)
-                {
-                    errorMessage = "Invalid To condition!!";
+                IsValidFromToCondition(ctx.inputFrom, ctx.inputTo, ctx);
+                errorMessage = ctx.InputToError;
 
+                var (_, isToValid) = IsValidFromToCondition(ctx.inputFrom, ctx.inputTo, ctx);
+                if (!isToValid)
+                {
+                    errorMessage = ctx.InputToError;
                     Console.WriteLine(errorMessage);
                 }
                 else
                 {
                     errorMessage = "";
-
                 }
                 Console.WriteLine();
             } while (errorMessage != "");
-
         }
 
-
-        public static int IsValidFromToCondition(string from, string to, ChessContext ctx)
+        public static (bool, bool) IsValidFromToCondition(string from, string to, ChessContext ctx)
         {
+            // From validation
+            bool isFromValid = true;
+            ctx.InputFromError= "";
 
             if (string.IsNullOrEmpty(from))
             {
-                //Console.WriteLine("From cannot be empty!!");
-                return 1;
+                ctx.InputFromError = "From cannot be empty!!";
+                isFromValid = false;
             }
-
-            if (from.Length != 2)
+            else if (from.Length != 2)
             {
-                return 4; // From must be 2 characters long
+                ctx.InputFromError = "From must be 2 characters long!!";
+                isFromValid = false;
             }
-
-            char letter = from[0];
-
-            if (!(letter >= 'a' & letter <= 'h'))
+            else
             {
-                //Console.WriteLine("From or To must be a valid letter!!\");
-                return 2;
+                char letter = from[0];
+                int number = from[1] - '0';
+                if (!(letter >= 'a' && letter <= 'h'))
+                {
+                    ctx.InputFromError = "Row (X Axis) of From must be between a-h";
+                    isFromValid = false;
+                }
+                else if (!(number >= 1 && number <= 8))
+                {
+                    ctx.InputFromError = "Col (Y Axis) of From must be between 1-8";
+                    isFromValid = false;
+                }
             }
 
-            int number = from[1] - '0';// '0' karakterini çıkararak sayıya çeviriyoruz '0' eşittir 48 ASCII kodu
-            if (!(number >= 1 & number <= 8))
+            ctx.IsInputFromValid = isFromValid;
+            ctx.InputToError= "";
+
+
+            // To validation
+            bool isToValid = true;
+
+            if (!string.IsNullOrEmpty(to))
             {
-                // Console.WriteLine("From or To must be a valid number!!\");
-                return 3;
+                if (to.Length != 2)
+                {
+                    ctx.InputToError = "To must be 2 characters long!!";
+                    isToValid = false;
+                }
+                else
+                {
+                    char letter = to[0];
+                    int number = to[1] - '0';
+                    if (!(letter >= 'a' && letter <= 'h'))
+                    {
+                        ctx.InputToError = "To must be between a-h!!";
+                        isToValid = false;
+                    }
+                    else if (!(number >= 1 && number <= 8))
+                    {
+                        ctx.InputToError = "To must be between 1-8!!";
+                        isToValid = false;
+                    }
+                    else if (from != null && from == to)
+                    {
+                        ctx.InputToError = "From and To cannot be the same!!";
+                        isToValid = false;
+                    }
+                }
             }
-
-
-            //to part
-            if (string.IsNullOrEmpty(to))
+            else if (to != null)
             {
-                //Console.WriteLine("To cannot be empty!!");
-                return 11;
-
+                ctx.InputToError = "To cannot be empty!!";
+                isToValid = false;
             }
 
-            if (to.Length != 2)
-            {
-                return 5; // To must be 2 characters long
-            }
+            ctx.IsInputToValid = isToValid;
 
-
-            if (from == to)
-            {
-                //Console.WriteLine("From and To cannot be the same!!");
-                return 6;
-            }
-
-
-            if (!(to[1] - '0' > 0 & to[1] - '0' < 8))
-            {
-                //Console.WriteLine("to has to be between 1-7!!");
-                return 7;
-            }
-
-
-
-            return 0;
-
+            return (isFromValid, isToValid);
         }
-
-
     }
 }

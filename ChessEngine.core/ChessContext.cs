@@ -1,5 +1,4 @@
-﻿using System;
-using System.Collections.Generic;
+﻿using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using System.Text.RegularExpressions;
@@ -17,7 +16,7 @@ namespace ChessEngine.Core
         public bool whiteTurn = true;
 
 
-        public Cell touchedCell = new Cell(0, 0, null);
+        public Cell touchedCell { get; set; }
         public Cell lastFromCell = new Cell(0, 0, null);
         public Cell lastToCell = new Cell(0, 0, null);
 
@@ -31,6 +30,11 @@ namespace ChessEngine.Core
 
 
         public bool IsFakeMovement = false; // for testing sub purposes without stack overflow exception
+        public bool IsMoveTouchedMovableControl = false; // for testing sub purposes without stack overflow exception
+        public bool IsInputFromValid = true;
+        public string InputFromError { get; set; }
+        public bool IsInputToValid = true;
+        public string InputToError { get; set; }
 
         public bool whiteWins = false;
         public bool blackWins = false;
@@ -55,6 +59,7 @@ namespace ChessEngine.Core
         public ChessContext()
         {
             Board = new char[8, 8]; // 8x8 satranç tahtası
+            
         }
 
         // Her hamle sonrası çağrılacak yardımcı metot:

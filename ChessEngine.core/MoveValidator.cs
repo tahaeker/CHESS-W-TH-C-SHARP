@@ -272,43 +272,49 @@ namespace ChessEngine.Core
             return false;
         }
 
-
-
-
-        public void TouchedCellMovable(Cell fromCell, ChessContext ctx)
+        public static bool IsTouchedCellMovable(string from, ChessContext ctx)
         {
-            /// Can move Touched from Cell  
+            // Prevent stack overflow by setting IsFakeTouchedMovable and IsFakeMovement
             ChessContext tempCtx = BoardState.copyBoard(ctx);
-             
-            bool state = false;
-            for (int rowT = 0; rowT<8; rowT++)
-            {
-                for (int colT = 0; colT<8; colT++)
-                {
+            Cell fromCell = BoardConverter.StringToCell(from,tempCtx);
+            tempCtx.IsMoveTouchedMovableControl = true;
 
+            bool state = false;
+
+            for (int rowT = 0; rowT < 8; rowT++)
+            {
+                for (int colT = 0; colT < 8; colT++)
+                {
                     string to = BoardConverter.IndexToString(rowT, colT);
-                    bool stoneColorW = fromCell.IsWhite ? true : false;
+                    bool stoneColorW = fromCell.IsWhite;
+                    
+                    
+                    if (fromCell.CellString == to)
+                        continue;
+
+                    tempCtx.whiteTurn = stoneColorW;
+
                     string error = ErrorChecker.MoveError(fromCell.CellString, to, tempCtx);
+                    
                     if (stoneColorW)
                     {
-                        tempCtx.whiteTurn =true;
+                        tempCtx.whiteTurn = true;
                         state = error == "" ? true : false;
                         if (state)
-                            fromCell.IsTouchedCellMovable =true;
-
+                            return true;
                     }
-                    else if (!stoneColorW)
+                    else
                     {
-                        tempCtx.whiteTurn =false;
+                        tempCtx.whiteTurn = false;
                         state = error == "" ? true : false;
                         if (state)
-                            fromCell.IsTouchedCellMovable = true;
+                            //ctx.IsMoveTouchedMovableControl= false;
+                            return true;
                     }
-                    tempCtx.IsFakeMovement = false;
-
                 }
-
             }
+            
+            return false;
         }
     }
 }

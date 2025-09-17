@@ -31,7 +31,9 @@ namespace ChessEngine.Core
                     if (ctx.inputFrom != "")
                     {
                         string pos = BoardConverter.IndexToString(i, j);
+                        
                         string moveError = ErrorChecker.MoveError(ctx.inputFrom, pos, ctx);
+                        
 
                         if (i == ctx.touchedCell.Row && j == ctx.touchedCell.Col)
                         {

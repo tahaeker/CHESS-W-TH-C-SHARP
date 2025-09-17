@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Linq.Expressions;
 using System.Text;
 using System.Threading.Tasks;
 
@@ -17,7 +18,7 @@ namespace ChessEngine.Core
                                            //'a' = ascii97
             int col = position[0] - 'a'; // 'a' karakterinden çıkararak sütun indeksini al
                                          // '1' = ascii 48
-            int row = 8 - (position[1] - '0'); // '0' karakterinden çıkararak satır indeksini al
+            int row = 8 - (position[1] - '0') ; // '0' karakterinden çıkararak satır indeksini al
             return (row, col);
         }
 
